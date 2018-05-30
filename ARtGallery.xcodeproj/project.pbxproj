@@ -16,6 +16,7 @@
 		0285F810208A834200A7B463 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0285F80D208A834100A7B463 /* MainViewController.m */; };
 		0285F811208A834200A7B463 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0285F80F208A834200A7B463 /* GoogleService-Info.plist */; };
 		4F03739D20BEFB5D00316F67 /* Room.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F03739C20BEFB5D00316F67 /* Room.m */; };
+		4F0373A020BF089E00316F67 /* ARObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F03739F20BF089E00316F67 /* ARObject.m */; };
 		80BAAA29FC9711A097CB4ECA /* libPods-CloudAnchorExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D450D5011294F2DF454E3A6 /* libPods-CloudAnchorExample.a */; };
 /* End PBXBuildFile section */
 
@@ -35,6 +36,8 @@
 		084CC6794D52F7BC5769CFAD /* Pods-CloudAnchorExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CloudAnchorExample.release.xcconfig"; path = "Pods/Target Support Files/Pods-CloudAnchorExample/Pods-CloudAnchorExample.release.xcconfig"; sourceTree = "<group>"; };
 		4F03739B20BEFB5D00316F67 /* Room.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Room.h; sourceTree = "<group>"; };
 		4F03739C20BEFB5D00316F67 /* Room.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Room.m; sourceTree = "<group>"; };
+		4F03739E20BF089E00316F67 /* ARObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARObject.h; sourceTree = "<group>"; };
+		4F03739F20BF089E00316F67 /* ARObject.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ARObject.m; sourceTree = "<group>"; };
 		5D450D5011294F2DF454E3A6 /* libPods-CloudAnchorExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CloudAnchorExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9520C75C7C4D3ACF4F7A3A24 /* Pods-CloudAnchorExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CloudAnchorExample.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CloudAnchorExample/Pods-CloudAnchorExample.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -85,6 +88,8 @@
 				0285F804208A82B900A7B463 /* main.m */,
 				4F03739B20BEFB5D00316F67 /* Room.h */,
 				4F03739C20BEFB5D00316F67 /* Room.m */,
+				4F03739E20BF089E00316F67 /* ARObject.h */,
+				4F03739F20BF089E00316F67 /* ARObject.m */,
 			);
 			path = ARtGallery;
 			sourceTree = "<group>";
@@ -219,6 +224,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F0373A020BF089E00316F67 /* ARObject.m in Sources */,
 				0285F810208A834200A7B463 /* MainViewController.m in Sources */,
 				0285F805208A82B900A7B463 /* main.m in Sources */,
 				4F03739D20BEFB5D00316F67 /* Room.m in Sources */,
