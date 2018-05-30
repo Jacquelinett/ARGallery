@@ -6,18 +6,23 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "ARObject.h"
 
 @interface Room : NSObject
 
-@property (readonly) int id;
-@property NSString *name;
-@property NSMutableArray *objectList;
+@property (strong, nonatomic) NSString *name;
+@property (strong, nonatomic) NSMutableArray *objectList;
 
 // Future to do:
 // Add lists of currently connected users
 
+- (instancetype) initWithName:(NSString *) roomName;
 
+- (void) addARObject : (ARObject *) object;
 
-
+- (void) setName : (NSString *) name;
+- (NSString *) getName;
 
 @end
+
+

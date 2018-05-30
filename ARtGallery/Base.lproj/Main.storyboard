@@ -5,8 +5,6 @@
     </device>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
-        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -22,14 +20,7 @@
                             <arscnView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DwP-2x-Cor">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                             </arscnView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UTo-R4-sJi">
-                                <rect key="frame" x="16" y="44" width="33" height="30"/>
-                                <state key="normal" title="Host"/>
-                                <connections>
-                                    <action selector="hostButtonPressed" destination="BV1-FR-VrT" eventType="touchUpInside" id="klm-Po-cNJ"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ngp-AH-x9i">
+                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ngp-AH-x9i">
                                 <rect key="frame" x="73" y="44" width="54" height="30"/>
                                 <state key="normal" title="Resolve"/>
                                 <connections>
@@ -103,27 +94,31 @@
                                 </constraints>
                                 <blurEffect style="dark"/>
                             </visualEffectView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lYB-Qf-sak">
+                                <rect key="frame" x="16" y="43" width="46" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Create"/>
+                                <connections>
+                                    <action selector="btnCreate_pressed:" destination="BV1-FR-VrT" eventType="touchUpInside" id="FfY-wV-pvV"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstAttribute="bottom" secondItem="H1h-42-tn7" secondAttribute="bottom" id="5fs-xU-93B"/>
-                            <constraint firstItem="UTo-R4-sJi" firstAttribute="leading" secondItem="Dif-Mu-SGU" secondAttribute="leading" constant="16" id="LLE-Oe-nKy"/>
                             <constraint firstItem="DwP-2x-Cor" firstAttribute="top" secondItem="0f6-Ih-tMV" secondAttribute="top" id="S57-fS-tPU"/>
                             <constraint firstItem="aZL-Tu-Idm" firstAttribute="top" secondItem="Dif-Mu-SGU" secondAttribute="top" id="WuA-1O-8Vk"/>
                             <constraint firstItem="H1h-42-tn7" firstAttribute="leading" secondItem="Dif-Mu-SGU" secondAttribute="leading" id="fgi-5P-dqr"/>
                             <constraint firstAttribute="bottom" secondItem="DwP-2x-Cor" secondAttribute="bottom" id="g36-wJ-mQ1"/>
-                            <constraint firstItem="UTo-R4-sJi" firstAttribute="trailing" secondItem="Ngp-AH-x9i" secondAttribute="leadingMargin" constant="-32" id="gbh-Gj-isp"/>
                             <constraint firstItem="aZL-Tu-Idm" firstAttribute="trailing" secondItem="Dif-Mu-SGU" secondAttribute="trailing" constant="-8" id="iVO-6g-TRF"/>
                             <constraint firstItem="H1h-42-tn7" firstAttribute="trailing" secondItem="Dif-Mu-SGU" secondAttribute="trailing" id="k6K-bn-hBj"/>
                             <constraint firstItem="DwP-2x-Cor" firstAttribute="trailing" secondItem="Dif-Mu-SGU" secondAttribute="trailing" id="mmY-Bh-Sic"/>
                             <constraint firstItem="Dif-Mu-SGU" firstAttribute="top" secondItem="Ngp-AH-x9i" secondAttribute="top" id="qId-fk-D4F"/>
                             <constraint firstItem="DwP-2x-Cor" firstAttribute="leading" secondItem="0f6-Ih-tMV" secondAttribute="leading" id="uQq-K6-B3f"/>
-                            <constraint firstItem="Dif-Mu-SGU" firstAttribute="top" secondItem="UTo-R4-sJi" secondAttribute="top" id="xTT-Hg-WRX"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Dif-Mu-SGU"/>
                     </view>
                     <connections>
-                        <outlet property="hostButton" destination="UTo-R4-sJi" id="wLk-zF-epd"/>
                         <outlet property="messageLabel" destination="175-A6-xYf" id="PgA-F8-Aax"/>
                         <outlet property="resolveButton" destination="Ngp-AH-x9i" id="s9d-7I-Smm"/>
                         <outlet property="roomCodeLabel" destination="Oin-eb-0c4" id="ivr-Ld-Wqv"/>
