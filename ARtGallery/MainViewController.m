@@ -28,14 +28,18 @@
 typedef NS_ENUM(NSInteger, ProgramState) {
     ProgramStateDefault,
     ProgramStateCreatingRoom,
-    ProgramStateRoomCreated,
     ProgramStateViewingRoom,
     ProgramStateEdittingRoom,
     ProgramStateHosting,
     ProgramStateHostingFinished,
-    ProgramStateEnterRoomCode,
     ProgramStateResolving,
     ProgramStateResolvingFinished
+};
+
+typedef NS_ENUM(NSInteger, DialogType) {
+    DialogTypeCreate,
+    DialogTypeJoin,
+    DialogTypeEdit
 };
 
 @interface MainViewController () <ARSCNViewDelegate, ARSessionDelegate, GARSessionDelegate>
@@ -44,8 +48,11 @@ typedef NS_ENUM(NSInteger, ProgramState) {
 
 @property(nonatomic, strong) FIRDatabaseReference *firebaseReference;
 
+@property(nonatomic, strong) NSMutableArray *currentDrawAnchors;
+@property(nonatomic, strong) NSMutableArray *currentCloudAnchors;
 @property(nonatomic, strong) ARAnchor *arAnchor;
 @property(nonatomic, strong) GARAnchor *garAnchor;
+//@property(nonatomic, strong) NSMutableArray *currentAnchorType;
 
 @property(nonatomic, strong) Room *currentRoom;
 
@@ -75,6 +82,8 @@ typedef NS_ENUM(NSInteger, ProgramState) {
     self.gSession = [GARSession sessionWithAPIKey:@"XXXXX"
                                  bundleIdentifier:@"XXXXX"
                                             error:nil];
+    self.currentCloudAnchors = [NSMutableArray new];
+    self.currentDrawAnchors = [NSMutableArray new];
     self.gSession.delegate = self;
     self.gSession.delegateQueue = dispatch_get_main_queue();
     
@@ -102,7 +111,7 @@ typedef NS_ENUM(NSInteger, ProgramState) {
 
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    if (touches.count < 1 || self.state != ProgramStateRoomCreated) {
+    if (touches.count < 1 || self.state != ProgramStateEdittingRoom) {
         return;
     }
     
@@ -125,52 +134,99 @@ typedef NS_ENUM(NSInteger, ProgramState) {
     }
 }
 
-#pragma mark - Anchor Hosting / Resolving
+# pragma mark - Actions
+
+- (IBAction)btnCreate_pressed {
+    if (self.state == ProgramStateDefault) {
+        //[self enterState:ProgramStateCreatingRoom];
+        [self roomNameDialog:DialogTypeCreate];
+    } else {
+        //[self enterState:ProgramStateDefault];
+    }
+}
+
+- (IBAction)btnJoin_pressed {
+    if (self.state == ProgramStateDefault) {
+        //[self enterState:ProgramStateCreatingRoom];
+        [self roomNameDialog:DialogTypeJoin];
+    } else {
+        //[self enterState:ProgramStateDefault];
+    }
+}
+
+- (IBAction)btnEdit_pressed {
+    
+}
+
+- (IBAction)btnDelete_pressed {
+    
+}
+
+#pragma mark room actions
+
+- (void)createRoom : (NSString *)roomName{
+    __weak MainViewController *weakSelf = self;
+    
+    [[self.firebaseReference child:@"room_names"] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
+        MainViewController *strongSelf = weakSelf;
+        
+        if ([snapshot.value isKindOfClass:[NSMutableArray class]]) {
+            NSMutableArray *nameList = snapshot.value;
+            
+            if ([nameList isEqual:[NSNull null]]) {
+                NSLog(@"NameList is null");
+                nameList = [NSMutableArray new];
+            }
+            
+            if ([nameList containsObject: roomName]) {
+                NSLog(@"Room name already exist");
+            }
+            else {
+                [nameList addObject:roomName];
+                
+                long long timestampInteger = (long long)([[NSDate date] timeIntervalSince1970] * 1000);
+                NSNumber *timestamp = [NSNumber numberWithLongLong:timestampInteger];
+                
+                NSDictionary *room = @{
+                                       @"updated_at_timestamp" : timestamp,
+                                       };
+                
+                [[[strongSelf.firebaseReference child:@"room_list"]
+                  child:roomName] setValue:room withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
+                    if (error) {
+                        [self createRoomFailed:@"Error on saving the room to room list"];
+                    } else {
+                        NSLog(@"Saved room info");
+                        [[strongSelf.firebaseReference child:@"room_names"] setValue:nameList withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
+                            if (error) {
+                                [self createRoomFailed:@"Error on storing list of used name"];
+                            } else {
+                                [self createRoomSuccess];
+                            }
+                        }];
+                    }
+                    
+                }];
+            }
+        }
+    } withCancelBlock:^(NSError * _Nonnull error) {
+        NSLog(@"%@", error.localizedDescription);
+    }];
+}
+
+- (void) createRoomFailed:(NSString *) errMsg {
+    NSLog(@"Failed to create room: %@", errMsg);
+}
+
+- (void) createRoomSuccess {
+    NSLog(@"Data saved successfully.");
+    NSLog(@"Past all the trouble");
+    
+    [self enterState:ProgramStateEdittingRoom];
+}
 
 - (void)joinRoom:(NSString *)roomName {
-    
-    /*
-     [[self.firebaseReference child:@"room_names"] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
-     MainViewController *strongSelf = weakSelf;
-     
-     NSMutableArray *nameList = snapshot.value;
-     
-     if ([nameList isEqual:[NSNull null]]) {
-     NSLog(@"NameList is null");
-     nameList = [NSMutableArray new];
-     }
-     
-     if ([nameList containsObject: roomName]) {
-     NSLog(@"Room name already exist");
-     }
-     else {
-     [nameList addObject:roomName];
-     
-     long long timestampInteger = (long long)([[NSDate date] timeIntervalSince1970] * 1000);
-     NSNumber *timestamp = [NSNumber numberWithLongLong:timestampInteger];
-     
-     NSDictionary *room = @{
-     @"updated_at_timestamp" : timestamp,
-     };
-     
-     [[[strongSelf.firebaseReference child:@"room_list"]
-     child:roomName] setValue:room];
-     
-     [[strongSelf.firebaseReference child:@"room_names"] setValue:nameList];
-     
-     NSLog(@"Past all the trouble");
-     }
-     } withCancelBlock:^(NSError * _Nonnull error) {
-     NSLog(@"%@", error.localizedDescription);
-     }];
-     */
-    
-    // When this function is called, you pass in a room code as an argument
-    //self.roomCode = roomCode;
-    //[self enterState:ProgramStateResolving];
-    
-    
-    __weak MainViewController *weakSelf = self; // self referencing
+    //__weak MainViewController *weakSelf = self; // self referencing
     
     [[self.firebaseReference child:@"room_names"] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
         //MainViewController *strongSelf = weakSelf;
@@ -182,7 +238,7 @@ typedef NS_ENUM(NSInteger, ProgramState) {
         }
         else {
             [[[self.firebaseReference child:@"room_list"] child:roomName] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
-                MainViewController *strongSelf = weakSelf;
+                //MainViewController *strongSelf = weakSelf;
                 
                 // Create a null anchor and attempt to load it with read information from database
                 
@@ -191,6 +247,7 @@ typedef NS_ENUM(NSInteger, ProgramState) {
                     
                     id room = [[Room alloc] initWithName:roomName];
                     if (room) {
+                        NSLog(@"%@", [room getName]);
                         NSDictionary *objectList = data[@"objectList"];
                         if ([objectList isEqual:[NSNull null]]) {
                             objectList = [NSDictionary new];
@@ -200,7 +257,7 @@ typedef NS_ENUM(NSInteger, ProgramState) {
                                 NSString *anchor = object[@"id"];
                                 NSNumber *type = object[@"type"];
                                 
-                                id arObj = [[ARObject alloc] initWithID:anchor type:(int)type];
+                                id arObj = [[ARObject alloc] initWithID:anchor type:(int)type resName:@""];
                                 if (arObj) {
                                     [room addObject:arObj];
                                 }
@@ -212,46 +269,90 @@ typedef NS_ENUM(NSInteger, ProgramState) {
             }];
         }
     }];
+}
+
+- (void) loadRoom:(Room *)room {
+    for (ARObject * arObj in room.objectList) {
+        [self loadAnchor:arObj.getID];
+    }
+}
+
+- (void) loadAnchor: (NSString *) anchorID {
     
+}
+
+- (void)editRoom:(NSString *)roomName {
+    //__weak MainViewController *weakSelf = self; // self referencing
     
-    // child: @name of sub-table of the database
+    [[self.firebaseReference child:@"room_names"] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
+        //MainViewController *strongSelf = weakSelf;
+        
+        NSMutableArray *nameList = snapshot.value;
+        
+        if ([nameList isEqual:[NSNull null]] || ![nameList containsObject: roomName]) {
+            NSLog(@"Room doesn't exist");
+        }
+        else {
+            [[[self.firebaseReference child:@"room_list"] child:roomName] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
+                //MainViewController *strongSelf = weakSelf;
+                
+                // Create a null anchor and attempt to load it with read information from database
+                
+                if ([snapshot.value isKindOfClass:[NSDictionary class]]) {
+                    NSDictionary *data = snapshot.value;
+                    
+                    id room = [[Room alloc] initWithName:roomName];
+                    if (room) {
+                        NSLog(@"%@", [room getName]);
+                        NSDictionary *objectList = data[@"objectList"];
+                        if ([objectList isEqual:[NSNull null]]) {
+                            objectList = [NSDictionary new];
+                        }
+                        else {
+                            for (NSDictionary *object in objectList) {
+                                NSString *anchor = object[@"id"];
+                                NSNumber *type = object[@"type"];
+                                
+                                id arObj = [[ARObject alloc] initWithID:anchor type:(int)type resName:@""];
+                                if (arObj) {
+                                    [room addObject:arObj];
+                                }
+                                NSLog(@"%@, %@", anchor, type);
+                            }
+                        }
+                    }
+                }
+            }];
+        }
+    }];
+}
+
+- (void)deleteRoom:(NSString *)roomName {
+    __weak MainViewController *weakSelf = self;
     
-    
-    /*[[[self.firebaseReference child:@"hotspot_list"] child:roomCode]
-     
-     // How Firebase listen for every data: https://firebase.google.com/docs/database/ios/read-and-write
-     observeEventType:FIRDataEventTypeValue
-     withBlock:^(FIRDataSnapshot *snapshot) {
-         
-         // Again, I don't know what going on behind screen
-         // But from my understanding this is essentially create a new thread or something and run asynchronously in the background
-         // To grab and process information without intefering with the program
-         dispatch_async(dispatch_get_main_queue(), ^{
-             MainViewController *strongSelf = weakSelf;
-             
-             // Since this is now running asynchronously and in the background
-             // We will need to check everytime it run to be sure that
-             // The view is not faulty (not nil) and in the correct state
-             if (strongSelf == nil || strongSelf.state != ProgramStateResolving ||
-                 ![strongSelf.roomCode isEqualToString:roomCode]) {
-                 return;
-             }
-             
-             
-             // Create a null anchor and attempt to load it with read information from database
-             NSString *anchorId = nil;
-             if ([snapshot.value isKindOfClass:[NSDictionary class]]) {
-                 NSDictionary *value = (NSDictionary *)snapshot.value;
-                 anchorId = value[@"hosted_anchor_id"];
-             }
-             
-             if (anchorId) {
-                 [[[strongSelf.firebaseReference child:@"hotspot_list"] child:roomCode]
-                  removeAllObservers];
-                 [strongSelf resolveAnchorWithIdentifier:anchorId];
-             }
-         });
-     }];*/
+    [[self.firebaseReference child:@"room_names"] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
+        MainViewController *strongSelf = weakSelf;
+        
+        if ([snapshot.value isKindOfClass:[NSMutableArray class]]) {
+            NSMutableArray *nameList = snapshot.value;
+            
+            if ([nameList isEqual:[NSNull null]]) {
+                NSLog(@"NameList is null");
+                nameList = [NSMutableArray new];
+            }
+            
+            if ([nameList containsObject: roomName]) {
+                [[[strongSelf.firebaseReference child:@"room_list"]
+                  child:roomName] removeValue];
+                
+                [[[strongSelf.firebaseReference child:@"room_name"]
+                  child:roomName] removeValue];
+            }
+            else {
+                NSLog(@"Room name don't exist");
+            }
+        }
+    }];
 }
 
 - (void)resolveAnchorWithRoomCode_old:(NSString *)roomCode {
@@ -312,30 +413,12 @@ typedef NS_ENUM(NSInteger, ProgramState) {
     self.arAnchor = [[ARAnchor alloc] initWithTransform:transform];
     [self.sceneView.session addAnchor:self.arAnchor];
     
+    [self.currentDrawAnchors addObject:self.arAnchor];
+    
     // To share an anchor, we call host anchor here on the ARCore session.
     // session:disHostAnchor: session:didFailToHostAnchor: will get called appropriately.
     self.garAnchor = [self.gSession hostCloudAnchor:self.arAnchor error:nil];
     [self enterState:ProgramStateHosting];
-}
-
-
-# pragma mark - Actions
-
-- (IBAction)hostButtonPressed {
-    if (self.state == ProgramStateDefault) {
-        [self enterState:ProgramStateCreatingRoom];
-        [self createRoom_old];
-    } else {
-        [self enterState:ProgramStateDefault];
-    }
-}
-
-- (IBAction)resolveButtonPressed {
-    if (self.state == ProgramStateDefault) {
-        [self enterState:ProgramStateEnterRoomCode];
-    } else {
-        [self enterState:ProgramStateDefault];
-    }
 }
 
 #pragma mark - GARSessionDelegate
@@ -347,15 +430,19 @@ typedef NS_ENUM(NSInteger, ProgramState) {
         return;
     }
     self.garAnchor = anchor;
-    [self enterState:ProgramStateHostingFinished];
-    // Write room + anchor to firebase
-    [[[[self.firebaseReference child:@"hotspot_list"] child:self.roomCode] child:@"hosted_anchor_id"]
+    
+    [self.currentCloudAnchors addObject:anchor];
+    
+    [self enterState:ProgramStateEdittingRoom];
+    
+    // anchor to firebase
+    [[[[self.firebaseReference child:@"room_list"] child:[_currentRoom getName]] child:anchor.cloudIdentifier]
      setValue:anchor.cloudIdentifier];
     
     // Write timestamp to firebase
     long long timestampInteger = (long long)([[NSDate date] timeIntervalSince1970] * 1000);
     NSNumber *timestamp = [NSNumber numberWithLongLong:timestampInteger];
-    [[[[self.firebaseReference child:@"hotspot_list"] child:self.roomCode]
+    [[[[self.firebaseReference child:@"room_list"] child:[_currentRoom getName]]
       child:@"updated_at_timestamp"] setValue:timestamp];
 }
 
@@ -367,7 +454,9 @@ typedef NS_ENUM(NSInteger, ProgramState) {
     
     // Sample code just consider it to be a fail experiment, don't do anything and just change the state
     self.garAnchor = anchor;
-    [self enterState:ProgramStateHostingFinished];
+    [self.sceneView.session removeAnchor:self.arAnchor];
+    [self.currentDrawAnchors removeObject:self.arAnchor];
+    [self enterState:ProgramStateEdittingRoom];
 }
 
 - (void)session:(GARSession *)session didResolveAnchor:(GARAnchor *)anchor {
@@ -483,7 +572,27 @@ typedef NS_ENUM(NSInteger, ProgramState) {
 - (void)enterState:(ProgramState)state {
     switch (state) {
         case ProgramStateDefault:
-            if (self.arAnchor) {
+            self.currentRoom = nil;
+            
+            for (ARAnchor * anchor in self.currentDrawAnchors) {
+                [self.sceneView.session removeAnchor:anchor];
+            }
+            
+            for (GARAnchor * anchor in self.currentCloudAnchors) {
+                [self.gSession removeAnchor:anchor];
+            }
+            
+            self.currentDrawAnchors = [NSMutableArray new];
+            self.currentCloudAnchors = [NSMutableArray new];
+            
+            [self toggleButton:self.btnCreate enabled:YES title:@"Create"];
+            [self toggleButton:self.btnJoin enabled:YES title:@"Join"];
+            [self toggleButton:self.btnEdit enabled:YES title:@"Edit"];
+            [self toggleButton:self.btnDelete enabled:NO title:@"Delete"];
+            
+            self.roomCode = @"Not in a room";
+            
+            /*if (self.arAnchor) {
                 [self.sceneView.session removeAnchor:self.arAnchor];
                 self.arAnchor = nil;
             }
@@ -503,19 +612,26 @@ typedef NS_ENUM(NSInteger, ProgramState) {
             }
             [self toggleButton:self.hostButton enabled:YES title:@"HOST"];
             [self toggleButton:self.resolveButton enabled:YES title:@"RESOLVE"];
-            self.roomCode = @"";
+            */
             break;
         case ProgramStateCreatingRoom:
             self.message = @"Creating room...";
-            [self toggleButton:self.hostButton enabled:NO title:@"HOST"];
-            [self toggleButton:self.resolveButton enabled:NO title:@"RESOLVE"];
+            [self toggleButton:self.btnCreate enabled:NO title:@"Create"];
+            [self toggleButton:self.btnJoin enabled:NO title:@"Join"];
+            [self toggleButton:self.btnEdit enabled:NO title:@"Edit"];
+            [self toggleButton:self.btnDelete enabled:NO title:@"Delete"];
             break;
         case ProgramStateViewingRoom:
+            [self toggleButton:self.btnCreate enabled:NO title:@"Create"];
+            [self toggleButton:self.btnJoin enabled:NO title:@"Join"];
+            [self toggleButton:self.btnEdit enabled:NO title:@"Edit"];
+            [self toggleButton:self.btnDelete enabled:NO title:@"Delete"];
             break;
-        case ProgramStateRoomCreated:
-            self.message = @"Tap on a plane to create anchor and host.";
-            [self toggleButton:self.hostButton enabled:YES title:@"CANCEL"];
-            [self toggleButton:self.resolveButton enabled:NO title:@"RESOLVE"];
+        case ProgramStateEdittingRoom:
+            [self toggleButton:self.btnCreate enabled:NO title:@"Create"];
+            [self toggleButton:self.btnJoin enabled:NO title:@"Join"];
+            [self toggleButton:self.btnEdit enabled:NO title:@"Edit"];
+            [self toggleButton:self.btnDelete enabled:YES title:@"Delete"];
             break;
         case ProgramStateHosting:
             self.message = @"Hosting anchor...";
@@ -525,14 +641,11 @@ typedef NS_ENUM(NSInteger, ProgramState) {
             [NSString stringWithFormat:@"Finished hosting: %@",
              [self cloudStateString:self.garAnchor.cloudState]];
             break;
-        case ProgramStateEnterRoomCode:
-            [self showRoomCodeDialog];
-            break;
         case ProgramStateResolving:
             [self dismissViewControllerAnimated:NO completion:^{}];
             self.message = @"Resolving anchor...";
-            [self toggleButton:self.hostButton enabled:NO title:@"HOST"];
-            [self toggleButton:self.resolveButton enabled:YES title:@"CANCEL"];
+            //[self toggleButton:self.hostButton enabled:NO title:@"HOST"];
+            //[self toggleButton:self.resolveButton enabled:YES title:@"CANCEL"];
             break;
         case ProgramStateResolvingFinished:
             self.message =
@@ -544,16 +657,7 @@ typedef NS_ENUM(NSInteger, ProgramState) {
     [self updateMessageLabel];
 }
 
-- (IBAction)btnCreate_pressed:(id)sender {
-    if (self.state == ProgramStateDefault) {
-        //[self enterState:ProgramStateCreatingRoom];
-        [self roomNameDialog];
-    } else {
-        //[self enterState:ProgramStateDefault];
-    }
-}
-
-- (void)roomNameDialog {
+- (void)roomNameDialog: (DialogType)type{
     UIAlertController *alertController =
     [UIAlertController alertControllerWithTitle:@"ENTER ROOM NAME"
                                         message:@""
@@ -567,7 +671,17 @@ typedef NS_ENUM(NSInteger, ProgramState) {
                                    //[self enterState:ProgramStateDefault];
                                } else {
                                    //[self resolveAnchorWithRoomCode:roomCode];
-                                   [self createRoom:roomName];
+                                   switch (type) {
+                                       case DialogTypeCreate:
+                                           [self createRoom:roomName];
+                                           break;
+                                       case DialogTypeJoin:
+                                           [self joinRoom:roomName];
+                                           break;
+                                       case DialogTypeEdit:
+                                           break;
+                                   }
+                                   
                                }
                            }];
     UIAlertAction *cancelAction =
@@ -584,45 +698,7 @@ typedef NS_ENUM(NSInteger, ProgramState) {
     [self presentViewController:alertController animated:NO completion:^{}];
 }
 
-- (void)createRoom : (NSString *)roomName{
-    __weak MainViewController *weakSelf = self;
-    
-    [[self.firebaseReference child:@"room_names"] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
-        MainViewController *strongSelf = weakSelf;
-        
-        if ([snapshot.value isKindOfClass:[NSMutableArray class]]) {
-            NSMutableArray *nameList = snapshot.value;
-            
-            if ([nameList isEqual:[NSNull null]]) {
-                NSLog(@"NameList is null");
-                nameList = [NSMutableArray new];
-            }
-            
-            if ([nameList containsObject: roomName]) {
-                NSLog(@"Room name already exist");
-            }
-            else {
-                [nameList addObject:roomName];
-                
-                long long timestampInteger = (long long)([[NSDate date] timeIntervalSince1970] * 1000);
-                NSNumber *timestamp = [NSNumber numberWithLongLong:timestampInteger];
-                
-                NSDictionary *room = @{
-                                       @"updated_at_timestamp" : timestamp,
-                                       };
-                
-                [[[strongSelf.firebaseReference child:@"room_list"]
-                  child:roomName] setValue:room];
-                
-                [[strongSelf.firebaseReference child:@"room_names"] setValue:nameList];
-                
-                NSLog(@"Past all the trouble");
-            }
-        }
-    } withCancelBlock:^(NSError * _Nonnull error) {
-        NSLog(@"%@", error.localizedDescription);
-    }];
-}
+
 
 // Note in this case, room is automatically created every time an anchor is hosted,
 - (void)createRoom_old {
@@ -668,7 +744,7 @@ typedef NS_ENUM(NSInteger, ProgramState) {
 
 - (void)roomCreated:(NSString *)roomCode {
     self.roomCode = roomCode;
-    [self enterState:ProgramStateRoomCreated];
+    //[self enterState:ProgramStateRoomCreated];
 }
 
 - (void)roomCreationFailed {

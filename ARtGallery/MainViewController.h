@@ -21,12 +21,16 @@
 @interface MainViewController : UIViewController
 
 @property(nonatomic, strong) IBOutlet ARSCNView *sceneView;
-@property(nonatomic, strong) IBOutlet UIButton *hostButton;
-@property(nonatomic, strong) IBOutlet UIButton *resolveButton;
+@property(nonatomic, strong) IBOutlet UIButton *btnCreate;
+@property(nonatomic, strong) IBOutlet UIButton *btnJoin;
+@property(nonatomic, strong) IBOutlet UIButton *btnEdit;
+@property(nonatomic, strong) IBOutlet UIButton *btnDelete;
 @property(nonatomic, strong) IBOutlet UILabel *roomCodeLabel;
 @property(nonatomic, strong) IBOutlet UILabel *messageLabel;
 
-- (IBAction)hostButtonPressed;
-- (IBAction)resolveButtonPressed;
+- (IBAction)btnCreate_pressed;
+- (IBAction)btnJoin_pressed;
+- (IBAction)btnEdit_pressed;
+- (IBAction)btnDelete_pressed;
 
 @end
