@@ -25,12 +25,15 @@
 @property(nonatomic, strong) IBOutlet UIButton *btnJoin;
 @property(nonatomic, strong) IBOutlet UIButton *btnEdit;
 @property(nonatomic, strong) IBOutlet UIButton *btnDelete;
-@property(nonatomic, strong) IBOutlet UILabel *roomCodeLabel;
+@property(nonatomic, strong) IBOutlet UIButton *btnLeave;
+@property(nonatomic, strong) IBOutlet UILabel *lblRoomName;
 @property(nonatomic, strong) IBOutlet UILabel *messageLabel;
 
-- (IBAction)btnCreate_pressed;
-- (IBAction)btnJoin_pressed;
-- (IBAction)btnEdit_pressed;
-- (IBAction)btnDelete_pressed;
+- (IBAction)btnCreate_pressed:(id)sender;
+- (IBAction)btnJoin_pressed:(id)sender;
+- (IBAction)btnEdit_pressed:(id)sender;
+- (IBAction)btnDelete_pressed:(id)sender;
+- (IBAction)btnLeave_pressed:(id)sender;
+
 
 @end

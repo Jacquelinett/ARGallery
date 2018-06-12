@@ -39,7 +39,8 @@ typedef NS_ENUM(NSInteger, ProgramState) {
 typedef NS_ENUM(NSInteger, DialogType) {
     DialogTypeCreate,
     DialogTypeJoin,
-    DialogTypeEdit
+    DialogTypeEdit,
+    DialogTypeRename
 };
 
 @interface MainViewController () <ARSCNViewDelegate, ARSessionDelegate, GARSessionDelegate>
@@ -136,7 +137,7 @@ typedef NS_ENUM(NSInteger, DialogType) {
 
 # pragma mark - Actions
 
-- (IBAction)btnCreate_pressed {
+- (IBAction)btnCreate_pressed:(id)sender {
     if (self.state == ProgramStateDefault) {
         //[self enterState:ProgramStateCreatingRoom];
         [self roomNameDialog:DialogTypeCreate];
@@ -145,7 +146,7 @@ typedef NS_ENUM(NSInteger, DialogType) {
     }
 }
 
-- (IBAction)btnJoin_pressed {
+- (IBAction)btnJoin_pressed:(id)sender {
     if (self.state == ProgramStateDefault) {
         //[self enterState:ProgramStateCreatingRoom];
         [self roomNameDialog:DialogTypeJoin];
@@ -154,12 +155,28 @@ typedef NS_ENUM(NSInteger, DialogType) {
     }
 }
 
-- (IBAction)btnEdit_pressed {
-    
+- (IBAction)btnEdit_pressed:(id)sender {
+    if (self.state == ProgramStateDefault) {
+        [self roomNameDialog:DialogTypeEdit];
+    }
 }
 
-- (IBAction)btnDelete_pressed {
-    
+- (IBAction)btnDelete_pressed:(id)sender {
+    if ((self.state == ProgramStateEdittingRoom || self.state == ProgramStateViewingRoom) && self.currentRoom) {
+        [self deleteRoom: [self.currentRoom getName]];
+    }
+}
+
+- (IBAction)btnLeave_pressed:(id)sender {
+    if ((self.state == ProgramStateEdittingRoom || self.state == ProgramStateViewingRoom) && self.currentRoom) {
+        [self leaveRoom];
+    }
+}
+
+- (IBAction)lblRoomName_pressed:(id)sender {
+    if ((self.state == ProgramStateEdittingRoom || self.state == ProgramStateViewingRoom) && self.currentRoom) {
+        [self roomNameDialog:DialogTypeRename];
+    }
 }
 
 #pragma mark room actions
@@ -201,7 +218,8 @@ typedef NS_ENUM(NSInteger, DialogType) {
                             if (error) {
                                 [self createRoomFailed:@"Error on storing list of used name"];
                             } else {
-                                [self createRoomSuccess];
+                                id room = [[Room alloc] initWithName:roomName];
+                                [self createRoomSuccess: room];
                             }
                         }];
                     }
@@ -218,9 +236,11 @@ typedef NS_ENUM(NSInteger, DialogType) {
     NSLog(@"Failed to create room: %@", errMsg);
 }
 
-- (void) createRoomSuccess {
+- (void) createRoomSuccess: (Room *)createdRoom {
     NSLog(@"Data saved successfully.");
     NSLog(@"Past all the trouble");
+    
+    self.currentRoom = createdRoom;
     
     [self enterState:ProgramStateEdittingRoom];
 }
@@ -264,9 +284,13 @@ typedef NS_ENUM(NSInteger, DialogType) {
                                 NSLog(@"%@, %@", anchor, type);
                             }
                         }
+                        
+                        self.currentRoom = room;
                     }
                 }
             }];
+            
+            [self enterState:ProgramStateViewingRoom];
         }
     }];
 }
@@ -320,9 +344,13 @@ typedef NS_ENUM(NSInteger, DialogType) {
                                 NSLog(@"%@, %@", anchor, type);
                             }
                         }
+                        
+                        self.currentRoom = room;
                     }
                 }
             }];
+            
+            [self enterState:ProgramStateEdittingRoom];
         }
     }];
 }
@@ -345,13 +373,82 @@ typedef NS_ENUM(NSInteger, DialogType) {
                 [[[strongSelf.firebaseReference child:@"room_list"]
                   child:roomName] removeValue];
                 
-                [[[strongSelf.firebaseReference child:@"room_name"]
-                  child:roomName] removeValue];
+                [[[strongSelf.firebaseReference child:@"room_names"]
+                  child: [NSString stringWithFormat:@"%lu", [nameList indexOfObject: roomName]]] removeValue];
+                
+                [self enterState:ProgramStateDefault];
             }
+            
             else {
                 NSLog(@"Room name don't exist");
             }
         }
+    }];
+}
+
+- (void)leaveRoom {
+    if ((self.state == ProgramStateEdittingRoom || self.state == ProgramStateViewingRoom) && self.currentRoom) {
+        [self enterState:ProgramStateDefault];
+    }
+}
+
+- (void)renameRoom : (NSString *)newName : (NSString *)oldName{
+    __weak MainViewController *weakSelf = self;
+    
+    [[self.firebaseReference child:@"room_names"] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
+        MainViewController *strongSelf = weakSelf;
+        
+        if ([snapshot.value isKindOfClass:[NSMutableArray class]]) {
+            NSMutableArray *nameList = snapshot.value;
+            
+            if ([nameList isEqual:[NSNull null]]) {
+                NSLog(@"NameList is null");
+                nameList = [NSMutableArray new];
+            }
+            
+            if ([nameList containsObject: newName]) {
+                NSLog(@"Room name already exist");
+            }
+            else {
+                if ([nameList containsObject: oldName]) {
+                    [nameList removeObject:oldName];
+                    [nameList addObject:newName];
+                    
+                    long long timestampInteger = (long long)([[NSDate date] timeIntervalSince1970] * 1000);
+                    NSNumber *timestamp = [NSNumber numberWithLongLong:timestampInteger];
+                    
+                    NSDictionary *room = @{
+                                           @"updated_at_timestamp" : timestamp,
+                                           };
+                    
+                    [[[strongSelf.firebaseReference child:@"room_list"]
+                      child:newName] setValue:room withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
+                        if (error) {
+                            [self createRoomFailed:@"Error on saving the room to room list"];
+                        } else {
+                            NSLog(@"Saved room info");
+                            [[strongSelf.firebaseReference child:@"room_names"] setValue:nameList withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
+                                if (error) {
+                                    //[self createRoomFailed:@"Error on storing list of used name"];
+                                } else {
+                                    [self.currentRoom setName:newName];
+                                    
+                                    [[[strongSelf.firebaseReference child:@"room_list"]
+                                      child:oldName] removeValue];
+                                    
+                                    self.roomCode = newName;
+                                    self.message = @"Successfully renamed the room";
+                                    [self updateMessageLabel];
+                                }
+                            }];
+                        }
+                        
+                    }];
+                }
+            }
+        }
+    } withCancelBlock:^(NSError * _Nonnull error) {
+        NSLog(@"%@", error.localizedDescription);
     }];
 }
 
@@ -501,7 +598,7 @@ typedef NS_ENUM(NSInteger, DialogType) {
 
 - (void)updateMessageLabel {
     [self.messageLabel setText:self.message];
-    self.roomCodeLabel.text = [NSString stringWithFormat:@"Room: %@", self.roomCode];
+    self.lblRoomName.text = [NSString stringWithFormat:@"Room: %@", self.roomCode];
 }
 
 - (void)toggleButton:(UIButton *)button enabled:(BOOL)enabled title:(NSString *)title {
@@ -589,8 +686,10 @@ typedef NS_ENUM(NSInteger, DialogType) {
             [self toggleButton:self.btnJoin enabled:YES title:@"Join"];
             [self toggleButton:self.btnEdit enabled:YES title:@"Edit"];
             [self toggleButton:self.btnDelete enabled:NO title:@"Delete"];
+            [self toggleButton:self.btnLeave enabled:NO title:@"Leave"];
             
-            self.roomCode = @"Not in a room";
+            self.roomCode = @"N/A";
+            self.message = @"";
             
             /*if (self.arAnchor) {
                 [self.sceneView.session removeAnchor:self.arAnchor];
@@ -615,23 +714,28 @@ typedef NS_ENUM(NSInteger, DialogType) {
             */
             break;
         case ProgramStateCreatingRoom:
-            self.message = @"Creating room...";
+            self.message = [@"Creating " stringByAppendingString:self.roomCode];
             [self toggleButton:self.btnCreate enabled:NO title:@"Create"];
             [self toggleButton:self.btnJoin enabled:NO title:@"Join"];
             [self toggleButton:self.btnEdit enabled:NO title:@"Edit"];
             [self toggleButton:self.btnDelete enabled:NO title:@"Delete"];
+            [self toggleButton:self.btnLeave enabled:NO title:@"Leave"];
             break;
         case ProgramStateViewingRoom:
+            self.message = [@"Viewing " stringByAppendingString:self.roomCode];
             [self toggleButton:self.btnCreate enabled:NO title:@"Create"];
             [self toggleButton:self.btnJoin enabled:NO title:@"Join"];
             [self toggleButton:self.btnEdit enabled:NO title:@"Edit"];
             [self toggleButton:self.btnDelete enabled:NO title:@"Delete"];
+            [self toggleButton:self.btnLeave enabled:YES title:@"Leave"];
             break;
         case ProgramStateEdittingRoom:
+            self.message = [@"Editting " stringByAppendingString:self.roomCode];
             [self toggleButton:self.btnCreate enabled:NO title:@"Create"];
             [self toggleButton:self.btnJoin enabled:NO title:@"Join"];
             [self toggleButton:self.btnEdit enabled:NO title:@"Edit"];
             [self toggleButton:self.btnDelete enabled:YES title:@"Delete"];
+            [self toggleButton:self.btnLeave enabled:YES title:@"Leave"];
             break;
         case ProgramStateHosting:
             self.message = @"Hosting anchor...";
@@ -671,6 +775,7 @@ typedef NS_ENUM(NSInteger, DialogType) {
                                    //[self enterState:ProgramStateDefault];
                                } else {
                                    //[self resolveAnchorWithRoomCode:roomCode];
+                                   self.roomCode = roomName;
                                    switch (type) {
                                        case DialogTypeCreate:
                                            [self createRoom:roomName];
@@ -679,7 +784,10 @@ typedef NS_ENUM(NSInteger, DialogType) {
                                            [self joinRoom:roomName];
                                            break;
                                        case DialogTypeEdit:
+                                           [self editRoom:roomName];
                                            break;
+                                       case DialogTypeRename:
+                                           [self renameRoom:roomName : [self.currentRoom getName]];
                                    }
                                    
                                }
