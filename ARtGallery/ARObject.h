@@ -16,8 +16,13 @@ typedef NS_ENUM(NSInteger, AnchorType) {
 @interface ARObject : NSObject
 
 @property (strong, nonatomic) NSString *id;
+@property (strong, nonatomic) NSString *resourceName;
 @property (assign, nonatomic) AnchorType type;
 
-- (instancetype) initWithID: (NSString*) id type:(AnchorType) type;
+- (instancetype) initWithID: (NSString*) id type:(AnchorType) type resName:(NSString*) resName;
+
+- (NSString *) getID;
+- (NSString *) getResourceName;
+- (AnchorType) getType;
 
 @end
