@@ -17,7 +17,8 @@
 		0285F811208A834200A7B463 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0285F80F208A834200A7B463 /* GoogleService-Info.plist */; };
 		4F03739D20BEFB5D00316F67 /* Room.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F03739C20BEFB5D00316F67 /* Room.m */; };
 		4F0373A020BF089E00316F67 /* ARObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F03739F20BF089E00316F67 /* ARObject.m */; };
-		80BAAA29FC9711A097CB4ECA /* libPods-CloudAnchorExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D450D5011294F2DF454E3A6 /* libPods-CloudAnchorExample.a */; };
+		4F17276620D0385E00EF0E9F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F17276520D0385E00EF0E9F /* Security.framework */; };
+		D3904A8E92AD9EDB8E2673B8 /* libPods-ARtGallery.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A07FE2107FC2BE33450A2BDC /* libPods-ARtGallery.a */; settings = {ATTRIBUTES = (Required, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,13 +34,16 @@
 		0285F80D208A834100A7B463 /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		0285F80E208A834200A7B463 /* MainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
 		0285F80F208A834200A7B463 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		06AA38AC71652E04D47E7D79 /* Pods-ARtGallery.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARtGallery.release.xcconfig"; path = "Pods/Target Support Files/Pods-ARtGallery/Pods-ARtGallery.release.xcconfig"; sourceTree = "<group>"; };
 		084CC6794D52F7BC5769CFAD /* Pods-CloudAnchorExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CloudAnchorExample.release.xcconfig"; path = "Pods/Target Support Files/Pods-CloudAnchorExample/Pods-CloudAnchorExample.release.xcconfig"; sourceTree = "<group>"; };
 		4F03739B20BEFB5D00316F67 /* Room.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Room.h; sourceTree = "<group>"; };
 		4F03739C20BEFB5D00316F67 /* Room.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Room.m; sourceTree = "<group>"; };
 		4F03739E20BF089E00316F67 /* ARObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARObject.h; sourceTree = "<group>"; };
 		4F03739F20BF089E00316F67 /* ARObject.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ARObject.m; sourceTree = "<group>"; };
-		5D450D5011294F2DF454E3A6 /* libPods-CloudAnchorExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CloudAnchorExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F17276520D0385E00EF0E9F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		61F9E7B651EF06410CCEF64C /* Pods-ARtGallery.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARtGallery.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARtGallery/Pods-ARtGallery.debug.xcconfig"; sourceTree = "<group>"; };
 		9520C75C7C4D3ACF4F7A3A24 /* Pods-CloudAnchorExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CloudAnchorExample.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CloudAnchorExample/Pods-CloudAnchorExample.debug.xcconfig"; sourceTree = "<group>"; };
+		A07FE2107FC2BE33450A2BDC /* libPods-ARtGallery.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ARtGallery.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,7 +51,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				80BAAA29FC9711A097CB4ECA /* libPods-CloudAnchorExample.a in Frameworks */,
+				4F17276620D0385E00EF0E9F /* Security.framework in Frameworks */,
+				D3904A8E92AD9EDB8E2673B8 /* libPods-ARtGallery.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +104,8 @@
 			children = (
 				9520C75C7C4D3ACF4F7A3A24 /* Pods-CloudAnchorExample.debug.xcconfig */,
 				084CC6794D52F7BC5769CFAD /* Pods-CloudAnchorExample.release.xcconfig */,
+				61F9E7B651EF06410CCEF64C /* Pods-ARtGallery.debug.xcconfig */,
+				06AA38AC71652E04D47E7D79 /* Pods-ARtGallery.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -106,7 +113,8 @@
 		72E0C2BDA4A5C5C29CB98AED /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				5D450D5011294F2DF454E3A6 /* libPods-CloudAnchorExample.a */,
+				4F17276520D0385E00EF0E9F /* Security.framework */,
+				A07FE2107FC2BE33450A2BDC /* libPods-ARtGallery.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -192,7 +200,7 @@
 			);
 			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-CloudAnchorExample-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-ARtGallery-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -205,7 +213,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-CloudAnchorExample/Pods-CloudAnchorExample-resources.sh",
+				"${SRCROOT}/Pods/Target Support Files/Pods-ARtGallery/Pods-ARtGallery-resources.sh",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ARCore/ARCoreResources.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
@@ -214,7 +222,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CloudAnchorExample/Pods-CloudAnchorExample-resources.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ARtGallery/Pods-ARtGallery-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -364,7 +372,7 @@
 		};
 		0285F809208A82B900A7B463 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9520C75C7C4D3ACF4F7A3A24 /* Pods-CloudAnchorExample.debug.xcconfig */;
+			baseConfigurationReference = 61F9E7B651EF06410CCEF64C /* Pods-ARtGallery.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -383,7 +391,7 @@
 		};
 		0285F80A208A82B900A7B463 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 084CC6794D52F7BC5769CFAD /* Pods-CloudAnchorExample.release.xcconfig */;
+			baseConfigurationReference = 06AA38AC71652E04D47E7D79 /* Pods-ARtGallery.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";

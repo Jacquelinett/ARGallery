@@ -24,6 +24,7 @@
 #import <ARCore/ARCore.h>
 #import <ModelIO/ModelIO.h>
 #import <SceneKit/ModelIO.h>
+#import <RNCryptor-objc/RNEncryptor.h>
 
 typedef NS_ENUM(NSInteger, ProgramState) {
     ProgramStateDefault,
@@ -62,6 +63,8 @@ typedef NS_ENUM(NSInteger, DialogType) {
 @property(nonatomic, strong) NSString *roomCode;
 @property(nonatomic, strong) NSString *message;
 
+@property(nonatomic, strong) NSString *staticSalt;
+
 @end
 
 @implementation MainViewController
@@ -83,6 +86,9 @@ typedef NS_ENUM(NSInteger, DialogType) {
     self.gSession = [GARSession sessionWithAPIKey:@"XXXXX"
                                  bundleIdentifier:@"XXXXX"
                                             error:nil];
+    
+    self.staticSalt = @"XXXXX";
+    
     self.currentCloudAnchors = [NSMutableArray new];
     self.currentDrawAnchors = [NSMutableArray new];
     self.gSession.delegate = self;
@@ -181,52 +187,60 @@ typedef NS_ENUM(NSInteger, DialogType) {
 
 #pragma mark room actions
 
-- (void)createRoom : (NSString *)roomName{
+- (void)createRoom : (NSString *)roomName : (NSString *)password{
     __weak MainViewController *weakSelf = self;
     
     [[self.firebaseReference child:@"room_names"] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
         MainViewController *strongSelf = weakSelf;
         
-        if ([snapshot.value isKindOfClass:[NSMutableArray class]]) {
-            NSMutableArray *nameList = snapshot.value;
-            
-            if ([nameList isEqual:[NSNull null]]) {
-                NSLog(@"NameList is null");
-                nameList = [NSMutableArray new];
-            }
-            
-            if ([nameList containsObject: roomName]) {
-                NSLog(@"Room name already exist");
-            }
-            else {
-                [nameList addObject:roomName];
-                
-                long long timestampInteger = (long long)([[NSDate date] timeIntervalSince1970] * 1000);
-                NSNumber *timestamp = [NSNumber numberWithLongLong:timestampInteger];
-                
-                NSDictionary *room = @{
-                                       @"updated_at_timestamp" : timestamp,
-                                       };
-                
-                [[[strongSelf.firebaseReference child:@"room_list"]
-                  child:roomName] setValue:room withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
-                    if (error) {
-                        [self createRoomFailed:@"Error on saving the room to room list"];
-                    } else {
-                        NSLog(@"Saved room info");
-                        [[strongSelf.firebaseReference child:@"room_names"] setValue:nameList withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
-                            if (error) {
-                                [self createRoomFailed:@"Error on storing list of used name"];
-                            } else {
-                                id room = [[Room alloc] initWithName:roomName];
-                                [self createRoomSuccess: room];
-                            }
-                        }];
-                    }
-                    
-                }];
-            }
+        NSMutableArray * nameList = snapshot.value;
+        
+        if ([nameList isEqual:[NSNull null]]) {
+            NSLog(@"NameList is null");
+            nameList = [NSMutableArray new];
         }
+        
+        if ([nameList containsObject: roomName]) {
+            self.message = @"Room name already existed";
+            [self updateMessageLabel];
+        }
+        else {
+            [nameList addObject:roomName];
+            
+            long long timestampInteger = (long long)([[NSDate date] timeIntervalSince1970] * 1000);
+            NSNumber *timestamp = [NSNumber numberWithLongLong:timestampInteger];
+            
+            NSData * salt = [[self.staticSalt stringByAppendingString:roomName] dataUsingEncoding:NSUTF8StringEncoding];
+            NSData * hash = [RNCryptor keyForPassword:password salt:salt settings:kRNCryptorAES256Settings.keySettings];
+            
+            NSString * salt64 = [salt base64EncodedStringWithOptions:0];
+            NSString * hash64 = [hash base64EncodedStringWithOptions:0];
+            
+            NSDictionary *room = @{
+                                   @"updated_at_timestamp" : timestamp,
+                                   @"salt" : salt64,
+                                   @"hash" : hash64
+                                   };
+            
+            [[[strongSelf.firebaseReference child:@"room_list"]
+              child:roomName] setValue:room withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
+                if (error) {
+                    [self createRoomFailed:@"Error on saving the room to room list"];
+                } else {
+                    NSLog(@"Saved room info");
+                    [[strongSelf.firebaseReference child:@"room_names"] setValue:nameList withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
+                        if (error) {
+                            [self createRoomFailed:@"Error on storing list of used name"];
+                        } else {
+                            id room = [[Room alloc] initWithName:roomName];
+                            [self createRoomSuccess: room];
+                        }
+                    }];
+                }
+                
+            }];
+        }
+        
     } withCancelBlock:^(NSError * _Nonnull error) {
         NSLog(@"%@", error.localizedDescription);
     }];
@@ -254,7 +268,8 @@ typedef NS_ENUM(NSInteger, DialogType) {
         NSMutableArray *nameList = snapshot.value;
         
         if ([nameList isEqual:[NSNull null]] || ![nameList containsObject: roomName]) {
-            NSLog(@"Room doesn't exist");
+            self.message = @"Room doesn't exist";
+            [self updateMessageLabel];
         }
         else {
             [[[self.firebaseReference child:@"room_list"] child:roomName] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
@@ -305,7 +320,7 @@ typedef NS_ENUM(NSInteger, DialogType) {
     
 }
 
-- (void)editRoom:(NSString *)roomName {
+- (void)editRoom:(NSString *)roomName : (NSString *) password {
     //__weak MainViewController *weakSelf = self; // self referencing
     
     [[self.firebaseReference child:@"room_names"] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
@@ -314,7 +329,8 @@ typedef NS_ENUM(NSInteger, DialogType) {
         NSMutableArray *nameList = snapshot.value;
         
         if ([nameList isEqual:[NSNull null]] || ![nameList containsObject: roomName]) {
-            NSLog(@"Room doesn't exist");
+            self.message = @"Room doesn't exist";
+            [self updateMessageLabel];
         }
         else {
             [[[self.firebaseReference child:@"room_list"] child:roomName] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
@@ -325,32 +341,43 @@ typedef NS_ENUM(NSInteger, DialogType) {
                 if ([snapshot.value isKindOfClass:[NSDictionary class]]) {
                     NSDictionary *data = snapshot.value;
                     
-                    id room = [[Room alloc] initWithName:roomName];
-                    if (room) {
-                        NSLog(@"%@", [room getName]);
-                        NSDictionary *objectList = data[@"objectList"];
-                        if ([objectList isEqual:[NSNull null]]) {
-                            objectList = [NSDictionary new];
-                        }
-                        else {
-                            for (NSDictionary *object in objectList) {
-                                NSString *anchor = object[@"id"];
-                                NSNumber *type = object[@"type"];
-                                
-                                id arObj = [[ARObject alloc] initWithID:anchor type:(int)type resName:@""];
-                                if (arObj) {
-                                    [room addObject:arObj];
-                                }
-                                NSLog(@"%@, %@", anchor, type);
+                    NSString * salt64 = data[@"salt"];
+                    id salt = [[NSData alloc] initWithBase64EncodedString:salt64 options:0];
+                    
+                    NSData * hash = [RNCryptor keyForPassword:password salt:salt settings:kRNCryptorAES256Settings.keySettings];
+                    NSString * hash64 = [hash base64EncodedStringWithOptions:0];
+                    
+                    
+                    if ([hash64 isEqualToString:data[@"hash"]]) {
+                        id room = [[Room alloc] initWithName:roomName];
+                        if (room) {
+                            NSLog(@"%@", [room getName]);
+                            NSDictionary *objectList = data[@"objectList"];
+                            if ([objectList isEqual:[NSNull null]]) {
+                                objectList = [NSDictionary new];
                             }
+                            else {
+                                for (NSDictionary *object in objectList) {
+                                    NSString *anchor = object[@"id"];
+                                    NSNumber *type = object[@"type"];
+                                    
+                                    id arObj = [[ARObject alloc] initWithID:anchor type:(int)type resName:@""];
+                                    if (arObj) {
+                                        [room addObject:arObj];
+                                    }
+                                    NSLog(@"%@, %@", anchor, type);
+                                }
+                            }
+                            
+                            self.currentRoom = room;
+                            [self enterState:ProgramStateEdittingRoom];
                         }
-                        
-                        self.currentRoom = room;
+                    }
+                    else {
+                        NSLog(@"Wrong password");
                     }
                 }
             }];
-            
-            [self enterState:ProgramStateEdittingRoom];
         }
     }];
 }
@@ -380,7 +407,8 @@ typedef NS_ENUM(NSInteger, DialogType) {
             }
             
             else {
-                NSLog(@"Room name don't exist");
+                self.message = @"Room doesn't exist";
+                [self updateMessageLabel];
             }
         }
     }];
@@ -407,7 +435,8 @@ typedef NS_ENUM(NSInteger, DialogType) {
             }
             
             if ([nameList containsObject: newName]) {
-                NSLog(@"Room name already exist");
+                self.message = @"Room name already exist";
+                [self updateMessageLabel];
             }
             else {
                 if ([nameList containsObject: oldName]) {
@@ -417,32 +446,43 @@ typedef NS_ENUM(NSInteger, DialogType) {
                     long long timestampInteger = (long long)([[NSDate date] timeIntervalSince1970] * 1000);
                     NSNumber *timestamp = [NSNumber numberWithLongLong:timestampInteger];
                     
-                    NSDictionary *room = @{
-                                           @"updated_at_timestamp" : timestamp,
-                                           };
-                    
-                    [[[strongSelf.firebaseReference child:@"room_list"]
-                      child:newName] setValue:room withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
-                        if (error) {
-                            [self createRoomFailed:@"Error on saving the room to room list"];
-                        } else {
-                            NSLog(@"Saved room info");
-                            [[strongSelf.firebaseReference child:@"room_names"] setValue:nameList withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
+                    [[[self.firebaseReference child:@"room_list"] child:oldName] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
+            
+                        if ([snapshot.value isKindOfClass:[NSDictionary class]]) {
+                            NSDictionary *data = snapshot.value;
+                            
+                            NSString * salt64 = data[@"salt"];
+                            NSString * hash64 = data[@"hash"];
+                            
+                            NSDictionary *room = @{
+                                                   @"updated_at_timestamp" : timestamp,
+                                                   @"salt" : salt64,
+                                                   @"hash" : hash64
+                                                   };
+                            
+                            [[[strongSelf.firebaseReference child:@"room_list"]
+                              child:newName] setValue:room withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
                                 if (error) {
-                                    //[self createRoomFailed:@"Error on storing list of used name"];
+                                    [self createRoomFailed:@"Error on saving the room to room list"];
                                 } else {
-                                    [self.currentRoom setName:newName];
-                                    
-                                    [[[strongSelf.firebaseReference child:@"room_list"]
-                                      child:oldName] removeValue];
-                                    
-                                    self.roomCode = newName;
-                                    self.message = @"Successfully renamed the room";
-                                    [self updateMessageLabel];
+                                    NSLog(@"Saved room info");
+                                    [[strongSelf.firebaseReference child:@"room_names"] setValue:nameList withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
+                                        if (error) {
+                                            //[self createRoomFailed:@"Error on storing list of used name"];
+                                        } else {
+                                            [self.currentRoom setName:newName];
+                                            
+                                            [[[strongSelf.firebaseReference child:@"room_list"]
+                                              child:oldName] removeValue];
+                                            
+                                            self.roomCode = newName;
+                                            self.message = @"Successfully renamed the room";
+                                            [self updateMessageLabel];
+                                        }
+                                    }];
                                 }
                             }];
                         }
-                        
                     }];
                 }
             }
@@ -635,37 +675,6 @@ typedef NS_ENUM(NSInteger, DialogType) {
     }
 }
 
-// This is for resolving button
-- (void)showRoomCodeDialog {
-    UIAlertController *alertController =
-    [UIAlertController alertControllerWithTitle:@"ENTER ROOM CODE"
-                                        message:@""
-                                 preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *okAction =
-    [UIAlertAction actionWithTitle:@"OK"
-                             style:UIAlertActionStyleDefault
-                           handler:^(UIAlertAction *action) {
-                               NSString *roomCode = alertController.textFields[0].text;
-                               if ([roomCode length] == 0) {
-                                   [self enterState:ProgramStateDefault];
-                               } else {
-                                   [self resolveAnchorWithRoomCode_old:roomCode];
-                               }
-                           }];
-    UIAlertAction *cancelAction =
-    [UIAlertAction actionWithTitle:@"CANCEL"
-                             style:UIAlertActionStyleDefault
-                           handler:^(UIAlertAction *action) {
-                               [self enterState:ProgramStateDefault];
-                           }];
-    [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.keyboardType = UIKeyboardTypeNumberPad;
-    }];
-    [alertController addAction:okAction];
-    [alertController addAction:cancelAction];
-    [self presentViewController:alertController animated:NO completion:^{}];
-}
-
 - (void)enterState:(ProgramState)state {
     switch (state) {
         case ProgramStateDefault:
@@ -771,6 +780,7 @@ typedef NS_ENUM(NSInteger, DialogType) {
                              style:UIAlertActionStyleDefault
                            handler:^(UIAlertAction *action) {
                                NSString *roomName = alertController.textFields[0].text;
+                               NSString *password = alertController.textFields[1].text;
                                if ([roomName length] == 0) {
                                    //[self enterState:ProgramStateDefault];
                                } else {
@@ -778,13 +788,13 @@ typedef NS_ENUM(NSInteger, DialogType) {
                                    self.roomCode = roomName;
                                    switch (type) {
                                        case DialogTypeCreate:
-                                           [self createRoom:roomName];
+                                           [self createRoom:roomName : password];
                                            break;
                                        case DialogTypeJoin:
                                            [self joinRoom:roomName];
                                            break;
                                        case DialogTypeEdit:
-                                           [self editRoom:roomName];
+                                           [self editRoom:roomName : password];
                                            break;
                                        case DialogTypeRename:
                                            [self renameRoom:roomName : [self.currentRoom getName]];
@@ -799,55 +809,17 @@ typedef NS_ENUM(NSInteger, DialogType) {
                                [self enterState:ProgramStateDefault];
                            }];
     [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.keyboardType = UIKeyboardTypeNumberPad;
+        textField.keyboardType = UIKeyboardTypeDefault;
+    }];
+    [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+        textField.keyboardType = UIKeyboardTypeDefault;
+        if (type != DialogTypeCreate && type != DialogTypeEdit) {
+            [textField setEnabled:false];
+        }
     }];
     [alertController addAction:okAction];
     [alertController addAction:cancelAction];
     [self presentViewController:alertController animated:NO completion:^{}];
-}
-
-
-
-// Note in this case, room is automatically created every time an anchor is hosted,
-- (void)createRoom_old {
-    __weak MainViewController *weakSelf = self;
-    [[self.firebaseReference child:@"last_room_code"]
-     runTransactionBlock:^FIRTransactionResult *(FIRMutableData *currentData) {
-         MainViewController *strongSelf = weakSelf;
-         
-         NSNumber *roomNumber = currentData.value;
-         
-         if (!roomNumber || [roomNumber isEqual:[NSNull null]]) {
-             roomNumber = @0;
-         }
-         
-         NSInteger roomNumberInt = [roomNumber integerValue];
-         roomNumberInt++;
-         NSNumber *newRoomNumber = [NSNumber numberWithInteger:roomNumberInt];
-         
-         long long timestampInteger = (long long)([[NSDate date] timeIntervalSince1970] * 1000);
-         NSNumber *timestamp = [NSNumber numberWithLongLong:timestampInteger];
-         
-         NSDictionary *room = @{
-                                @"display_name" : [newRoomNumber stringValue],
-                                @"updated_at_timestamp" : timestamp,
-                                };
-         
-         [[[strongSelf.firebaseReference child:@"hotspot_list"]
-           child:[newRoomNumber stringValue]] setValue:room];
-         
-         currentData.value = newRoomNumber;
-         
-         return [FIRTransactionResult successWithValue:currentData];
-     } andCompletionBlock:^(NSError *error, BOOL committed, FIRDataSnapshot *snapshot) {
-         dispatch_async(dispatch_get_main_queue(), ^{
-             if (error) {
-                 [weakSelf roomCreationFailed];
-             } else {
-                 [weakSelf roomCreated:[(NSNumber *)snapshot.value stringValue]];
-             }
-         });
-     }];
 }
 
 - (void)roomCreated:(NSString *)roomCode {
