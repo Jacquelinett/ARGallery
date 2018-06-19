@@ -15,32 +15,26 @@
  */
 
 #import "MainViewController.h"
-#import "Room.h"
 
 #import <dispatch/dispatch.h>
 
 #import <ARKit/ARKit.h>
-#import <FirebaseDatabase/FirebaseDatabase.h>
 #import <ARCore/ARCore.h>
 #import <ModelIO/ModelIO.h>
 #import <SceneKit/ModelIO.h>
-#import <RNCryptor-objc/RNEncryptor.h>
 
 typedef NS_ENUM(NSInteger, ProgramState) {
     ProgramStateDefault,
     ProgramStateCreatingRoom,
     ProgramStateViewingRoom,
     ProgramStateEdittingRoom,
-    ProgramStateHosting,
-    ProgramStateHostingFinished,
+    ProgramStateSaving,
+    ProgramStateSavingFinished,
     ProgramStateResolving,
     ProgramStateResolvingFinished
 };
 
 typedef NS_ENUM(NSInteger, DialogType) {
-    DialogTypeCreate,
-    DialogTypeJoin,
-    DialogTypeEdit,
     DialogTypeRename
 };
 
@@ -54,16 +48,18 @@ typedef NS_ENUM(NSInteger, DialogType) {
 @property(nonatomic, strong) NSMutableArray *currentCloudAnchors;
 @property(nonatomic, strong) ARAnchor *arAnchor;
 @property(nonatomic, strong) GARAnchor *garAnchor;
-//@property(nonatomic, strong) NSMutableArray *currentAnchorType;
+@property(nonatomic, strong) NSMutableDictionary *currentLoadAnchors;
+
+@property(nonatomic, strong) NSString * currentResourceID;
+@property(nonatomic, assign) AnchorType currentAnchorType;
 
 @property(nonatomic, strong) Room *currentRoom;
 
 @property(nonatomic, assign) ProgramState state;
+@property(nonatomic, assign) ViewType viewType;
 
 @property(nonatomic, strong) NSString *roomCode;
 @property(nonatomic, strong) NSString *message;
-
-@property(nonatomic, strong) NSString *staticSalt;
 
 @end
 
@@ -87,21 +83,23 @@ typedef NS_ENUM(NSInteger, DialogType) {
                                  bundleIdentifier:@"XXXXX"
                                             error:nil];
     
-    self.staticSalt = @"XXXXX";
+    
+    
+    self.currentAnchorType = AnchorTypeDefault;
+    self.currentResourceID = @"";
     
     self.currentCloudAnchors = [NSMutableArray new];
     self.currentDrawAnchors = [NSMutableArray new];
+    self.currentLoadAnchors = [NSMutableDictionary new];
     self.gSession.delegate = self;
     self.gSession.delegateQueue = dispatch_get_main_queue();
     
-    // Once finish initializing, enter the default state
-    [self enterState:ProgramStateDefault];
+    // We don't call loadRoom here because we want to wait for the viewWillAppear to run
+    // Since that is where all the AR Stuff happen
+    //[self enterState:ProgramStateDefault];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    // This just set up the configuration
-    // To be honest I don't understand what's going on behind the screen
-    // But I know it work
     [super viewWillAppear:animated];
     
     ARWorldTrackingConfiguration *configuration = [ARWorldTrackingConfiguration new];
@@ -109,6 +107,16 @@ typedef NS_ENUM(NSInteger, DialogType) {
     [configuration setPlaneDetection:ARPlaneDetectionHorizontal];
     
     [self.sceneView.session runWithConfiguration:configuration];
+    
+    
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [NSTimer scheduledTimerWithTimeInterval:2.0
+                                     target:self
+                                   selector:@selector(loadRoom)
+                                   userInfo:nil
+                                    repeats:NO];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -116,56 +124,32 @@ typedef NS_ENUM(NSInteger, DialogType) {
     [self.sceneView.session pause];
 }
 
-
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     if (touches.count < 1 || self.state != ProgramStateEdittingRoom) {
-        return;
+        [self loadRoom];
     }
-    
-    // This is where the magic of placing an anchor happen
-    // No mention of placing the actual image, just the anchor
-    // TODO: Turn this to a drag and drop
-    
-    UITouch *touch = [[touches allObjects] firstObject];
-    CGPoint touchLocation = [touch locationInView:self.sceneView];
-    
-    NSArray *hitTestResults =
-    [self.sceneView hitTest:touchLocation
-                      types:ARHitTestResultTypeExistingPlane |
-     ARHitTestResultTypeExistingPlaneUsingExtent |
-     ARHitTestResultTypeEstimatedHorizontalPlane];
-    
-    if (hitTestResults.count > 0) {
-        ARHitTestResult *result = [hitTestResults firstObject];
-        [self addAnchorWithTransform:result.worldTransform];
+    else {
+        // This is where the magic of placing an anchor happen
+        // No mention of placing the actual image, just the anchor
+        // TODO: Turn this to a drag and drop
+        
+        UITouch *touch = [[touches allObjects] firstObject];
+        CGPoint touchLocation = [touch locationInView:self.sceneView];
+        
+        NSArray *hitTestResults =
+        [self.sceneView hitTest:touchLocation
+                          types:ARHitTestResultTypeExistingPlane |
+         ARHitTestResultTypeExistingPlaneUsingExtent |
+         ARHitTestResultTypeEstimatedHorizontalPlane];
+        
+        if (hitTestResults.count > 0) {
+            ARHitTestResult *result = [hitTestResults firstObject];
+            [self addAnchorWithTransform:result.worldTransform];
+        }
     }
 }
 
 # pragma mark - Actions
-
-- (IBAction)btnCreate_pressed:(id)sender {
-    if (self.state == ProgramStateDefault) {
-        //[self enterState:ProgramStateCreatingRoom];
-        [self roomNameDialog:DialogTypeCreate];
-    } else {
-        //[self enterState:ProgramStateDefault];
-    }
-}
-
-- (IBAction)btnJoin_pressed:(id)sender {
-    if (self.state == ProgramStateDefault) {
-        //[self enterState:ProgramStateCreatingRoom];
-        [self roomNameDialog:DialogTypeJoin];
-    } else {
-        //[self enterState:ProgramStateDefault];
-    }
-}
-
-- (IBAction)btnEdit_pressed:(id)sender {
-    if (self.state == ProgramStateDefault) {
-        [self roomNameDialog:DialogTypeEdit];
-    }
-}
 
 - (IBAction)btnDelete_pressed:(id)sender {
     if ((self.state == ProgramStateEdittingRoom || self.state == ProgramStateViewingRoom) && self.currentRoom) {
@@ -187,65 +171,6 @@ typedef NS_ENUM(NSInteger, DialogType) {
 
 #pragma mark room actions
 
-- (void)createRoom : (NSString *)roomName : (NSString *)password{
-    __weak MainViewController *weakSelf = self;
-    
-    [[self.firebaseReference child:@"room_names"] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
-        MainViewController *strongSelf = weakSelf;
-        
-        NSMutableArray * nameList = snapshot.value;
-        
-        if ([nameList isEqual:[NSNull null]]) {
-            NSLog(@"NameList is null");
-            nameList = [NSMutableArray new];
-        }
-        
-        if ([nameList containsObject: roomName]) {
-            self.message = @"Room name already existed";
-            [self updateMessageLabel];
-        }
-        else {
-            [nameList addObject:roomName];
-            
-            long long timestampInteger = (long long)([[NSDate date] timeIntervalSince1970] * 1000);
-            NSNumber *timestamp = [NSNumber numberWithLongLong:timestampInteger];
-            
-            NSData * salt = [[self.staticSalt stringByAppendingString:roomName] dataUsingEncoding:NSUTF8StringEncoding];
-            NSData * hash = [RNCryptor keyForPassword:password salt:salt settings:kRNCryptorAES256Settings.keySettings];
-            
-            NSString * salt64 = [salt base64EncodedStringWithOptions:0];
-            NSString * hash64 = [hash base64EncodedStringWithOptions:0];
-            
-            NSDictionary *room = @{
-                                   @"updated_at_timestamp" : timestamp,
-                                   @"salt" : salt64,
-                                   @"hash" : hash64
-                                   };
-            
-            [[[strongSelf.firebaseReference child:@"room_list"]
-              child:roomName] setValue:room withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
-                if (error) {
-                    [self createRoomFailed:@"Error on saving the room to room list"];
-                } else {
-                    NSLog(@"Saved room info");
-                    [[strongSelf.firebaseReference child:@"room_names"] setValue:nameList withCompletionBlock:^(NSError *error, FIRDatabaseReference *ref) {
-                        if (error) {
-                            [self createRoomFailed:@"Error on storing list of used name"];
-                        } else {
-                            id room = [[Room alloc] initWithName:roomName];
-                            [self createRoomSuccess: room];
-                        }
-                    }];
-                }
-                
-            }];
-        }
-        
-    } withCancelBlock:^(NSError * _Nonnull error) {
-        NSLog(@"%@", error.localizedDescription);
-    }];
-}
-
 - (void) createRoomFailed:(NSString *) errMsg {
     NSLog(@"Failed to create room: %@", errMsg);
 }
@@ -259,127 +184,31 @@ typedef NS_ENUM(NSInteger, DialogType) {
     [self enterState:ProgramStateEdittingRoom];
 }
 
-- (void)joinRoom:(NSString *)roomName {
-    //__weak MainViewController *weakSelf = self; // self referencing
-    
-    [[self.firebaseReference child:@"room_names"] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
-        //MainViewController *strongSelf = weakSelf;
-        
-        NSMutableArray *nameList = snapshot.value;
-        
-        if ([nameList isEqual:[NSNull null]] || ![nameList containsObject: roomName]) {
-            self.message = @"Room doesn't exist";
-            [self updateMessageLabel];
-        }
-        else {
-            [[[self.firebaseReference child:@"room_list"] child:roomName] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
-                //MainViewController *strongSelf = weakSelf;
-                
-                // Create a null anchor and attempt to load it with read information from database
-                
-                if ([snapshot.value isKindOfClass:[NSDictionary class]]) {
-                    NSDictionary *data = snapshot.value;
-                    
-                    id room = [[Room alloc] initWithName:roomName];
-                    if (room) {
-                        NSLog(@"%@", [room getName]);
-                        NSDictionary *objectList = data[@"objectList"];
-                        if ([objectList isEqual:[NSNull null]]) {
-                            objectList = [NSDictionary new];
-                        }
-                        else {
-                            for (NSDictionary *object in objectList) {
-                                NSString *anchor = object[@"id"];
-                                NSNumber *type = object[@"type"];
-                                
-                                id arObj = [[ARObject alloc] initWithID:anchor type:(int)type resName:@""];
-                                if (arObj) {
-                                    [room addObject:arObj];
-                                }
-                                NSLog(@"%@, %@", anchor, type);
-                            }
-                        }
-                        
-                        self.currentRoom = room;
-                    }
-                }
-            }];
-            
-            [self enterState:ProgramStateViewingRoom];
-        }
-    }];
+- (void) setRoom:(Room *)room viewType : (ViewType) type {
+    self.currentRoom = room;
+    self.viewType = type;
 }
 
-- (void) loadRoom:(Room *)room {
-    for (ARObject * arObj in room.objectList) {
-        [self loadAnchor:arObj.getID];
+- (void) loadRoom{
+    if (self.currentRoom) {
+        self.roomCode = [self.currentRoom getName];
+        
+        switch (self.viewType) {
+            case ViewTypeEdit:
+                [self enterState:ProgramStateEdittingRoom];
+                break;
+            case ViewTypeJoin:
+                [self enterState:ProgramStateViewingRoom];
+        }
+
+        for (ARObject * arObj in self.currentRoom.objectList) {
+            [self loadAnchor:[arObj getAnchorID]];
+        }
     }
 }
 
 - (void) loadAnchor: (NSString *) anchorID {
-    
-}
-
-- (void)editRoom:(NSString *)roomName : (NSString *) password {
-    //__weak MainViewController *weakSelf = self; // self referencing
-    
-    [[self.firebaseReference child:@"room_names"] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
-        //MainViewController *strongSelf = weakSelf;
-        
-        NSMutableArray *nameList = snapshot.value;
-        
-        if ([nameList isEqual:[NSNull null]] || ![nameList containsObject: roomName]) {
-            self.message = @"Room doesn't exist";
-            [self updateMessageLabel];
-        }
-        else {
-            [[[self.firebaseReference child:@"room_list"] child:roomName] observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
-                //MainViewController *strongSelf = weakSelf;
-                
-                // Create a null anchor and attempt to load it with read information from database
-                
-                if ([snapshot.value isKindOfClass:[NSDictionary class]]) {
-                    NSDictionary *data = snapshot.value;
-                    
-                    NSString * salt64 = data[@"salt"];
-                    id salt = [[NSData alloc] initWithBase64EncodedString:salt64 options:0];
-                    
-                    NSData * hash = [RNCryptor keyForPassword:password salt:salt settings:kRNCryptorAES256Settings.keySettings];
-                    NSString * hash64 = [hash base64EncodedStringWithOptions:0];
-                    
-                    
-                    if ([hash64 isEqualToString:data[@"hash"]]) {
-                        id room = [[Room alloc] initWithName:roomName];
-                        if (room) {
-                            NSLog(@"%@", [room getName]);
-                            NSDictionary *objectList = data[@"objectList"];
-                            if ([objectList isEqual:[NSNull null]]) {
-                                objectList = [NSDictionary new];
-                            }
-                            else {
-                                for (NSDictionary *object in objectList) {
-                                    NSString *anchor = object[@"id"];
-                                    NSNumber *type = object[@"type"];
-                                    
-                                    id arObj = [[ARObject alloc] initWithID:anchor type:(int)type resName:@""];
-                                    if (arObj) {
-                                        [room addObject:arObj];
-                                    }
-                                    NSLog(@"%@, %@", anchor, type);
-                                }
-                            }
-                            
-                            self.currentRoom = room;
-                            [self enterState:ProgramStateEdittingRoom];
-                        }
-                    }
-                    else {
-                        NSLog(@"Wrong password");
-                    }
-                }
-            }];
-        }
-    }];
+    [self resolveAnchorWithIdentifier:anchorID];
 }
 
 - (void)deleteRoom:(NSString *)roomName {
@@ -404,6 +233,9 @@ typedef NS_ENUM(NSInteger, DialogType) {
                   child: [NSString stringWithFormat:@"%lu", [nameList indexOfObject: roomName]]] removeValue];
                 
                 [self enterState:ProgramStateDefault];
+                
+                GreetViewController *viewController = [self.storyboard instantiateViewControllerWithIdentifier:@"GreetViewController"];
+                [self presentViewController:viewController animated:YES completion:nil];
             }
             
             else {
@@ -417,6 +249,9 @@ typedef NS_ENUM(NSInteger, DialogType) {
 - (void)leaveRoom {
     if ((self.state == ProgramStateEdittingRoom || self.state == ProgramStateViewingRoom) && self.currentRoom) {
         [self enterState:ProgramStateDefault];
+        
+        GreetViewController *viewController = [self.storyboard instantiateViewControllerWithIdentifier:@"GreetViewController"];
+        [self presentViewController:viewController animated:YES completion:nil];
     }
 }
 
@@ -492,58 +327,15 @@ typedef NS_ENUM(NSInteger, DialogType) {
     }];
 }
 
-- (void)resolveAnchorWithRoomCode_old:(NSString *)roomCode {
-    
-    // When this function is called, you pass in a room code as an argument
-    self.roomCode = roomCode;
-    [self enterState:ProgramStateResolving];
-    __weak MainViewController *weakSelf = self; // self referencing
-    
-    
-    // child: @name of sub-table of the database
-    [[[self.firebaseReference child:@"hotspot_list"] child:roomCode]
-     
-     // How Firebase listen for every data: https://firebase.google.com/docs/database/ios/read-and-write
-     observeEventType:FIRDataEventTypeValue
-     withBlock:^(FIRDataSnapshot *snapshot) {
-         
-         // Again, I don't know what going on behind screen
-         // But from my understanding this is essentially create a new thread or something and run asynchronously in the background
-         // To grab and process information without intefering with the program
-         dispatch_async(dispatch_get_main_queue(), ^{
-             MainViewController *strongSelf = weakSelf;
-             
-             // Since this is now running asynchronously and in the background
-             // We will need to check everytime it run to be sure that
-             // The view is not faulty (not nil) and in the correct state
-             if (strongSelf == nil || strongSelf.state != ProgramStateResolving ||
-                 ![strongSelf.roomCode isEqualToString:roomCode]) {
-                 return;
-             }
-             
-             
-             // Create a null anchor and attempt to load it with read information from database
-             NSString *anchorId = nil;
-             if ([snapshot.value isKindOfClass:[NSDictionary class]]) {
-                 NSDictionary *value = (NSDictionary *)snapshot.value;
-                 anchorId = value[@"hosted_anchor_id"];
-             }
-             
-             if (anchorId) {
-                 [[[strongSelf.firebaseReference child:@"hotspot_list"] child:roomCode]
-                  removeAllObservers];
-                 [strongSelf resolveAnchorWithIdentifier:anchorId];
-             }
-         });
-     }];
-}
 
 - (void)resolveAnchorWithIdentifier:(NSString *)identifier {
     // Now that we have the anchor ID from firebase, we resolve the anchor.
     // Success and failure of this call is handled by the delegate methods
     
     // session:didResolveAnchor and session:didFailToResolveAnchor appropriately.
-    self.garAnchor = [self.gSession resolveCloudAnchorWithIdentifier:identifier error:nil];
+    NSLog(@"Attempted to load");
+    GARAnchor * anchor = [self.gSession resolveCloudAnchorWithIdentifier:identifier error:nil];
+    [self.currentLoadAnchors setValue:identifier forKey:[anchor.identifier UUIDString]];
 }
 
 - (void)addAnchorWithTransform:(matrix_float4x4)transform {
@@ -555,7 +347,7 @@ typedef NS_ENUM(NSInteger, DialogType) {
     // To share an anchor, we call host anchor here on the ARCore session.
     // session:disHostAnchor: session:didFailToHostAnchor: will get called appropriately.
     self.garAnchor = [self.gSession hostCloudAnchor:self.arAnchor error:nil];
-    [self enterState:ProgramStateHosting];
+    [self enterState:ProgramStateSaving];
 }
 
 #pragma mark - GARSessionDelegate
@@ -563,7 +355,7 @@ typedef NS_ENUM(NSInteger, DialogType) {
 - (void)session:(GARSession *)session didHostAnchor:(GARAnchor *)anchor {
     
     // This function run the anchor is soccessfully hosted
-    if (self.state != ProgramStateHosting || ![anchor isEqual:self.garAnchor]) {
+    if (self.state != ProgramStateSaving || ![anchor isEqual:self.garAnchor]) {
         return;
     }
     self.garAnchor = anchor;
@@ -573,8 +365,17 @@ typedef NS_ENUM(NSInteger, DialogType) {
     [self enterState:ProgramStateEdittingRoom];
     
     // anchor to firebase
-    [[[[self.firebaseReference child:@"room_list"] child:[_currentRoom getName]] child:anchor.cloudIdentifier]
-     setValue:anchor.cloudIdentifier];
+    id newARObject = [[ARObject alloc] initWithID:anchor.cloudIdentifier resource:self.currentResourceID type:self.currentAnchorType];
+    [self.currentRoom addARObject:newARObject];
+    
+    NSDictionary *objectData = @{
+                           @"anchorID" : anchor.cloudIdentifier,
+                           @"resourceID" : self.currentResourceID,
+                           @"type" : @(self.currentAnchorType)
+                           };
+    
+    [[[[[self.firebaseReference child:@"room_list"] child:[_currentRoom getName]] child:@"objectList"] child:anchor.cloudIdentifier]
+     setValue:objectData];
     
     // Write timestamp to firebase
     long long timestampInteger = (long long)([[NSDate date] timeIntervalSince1970] * 1000);
@@ -585,7 +386,7 @@ typedef NS_ENUM(NSInteger, DialogType) {
 
 - (void)session:(GARSession *)session didFailToHostAnchor:(GARAnchor *)anchor {
     // Run when anchor can't be hosted
-    if (self.state != ProgramStateHosting || ![anchor isEqual:self.garAnchor]) {
+    if (self.state != ProgramStateSaving || ![anchor isEqual:self.garAnchor]) {
         return;
     }
     
@@ -597,29 +398,16 @@ typedef NS_ENUM(NSInteger, DialogType) {
 }
 
 - (void)session:(GARSession *)session didResolveAnchor:(GARAnchor *)anchor {
-    
-    // Same thing as the successful host anchor but this is for resolve
-    // The anchor is passed back as an argument
-    if (self.state != ProgramStateResolving || ![anchor isEqual:self.garAnchor]) {
-        return;
-    }
-    
-    // Set up anchor
-    // IMPORTANT: GARAnchor is what being send/receive as data, probably exclusively a ARCore thing
-    // ARAnchor on the other hand, I THINK (not confirmed) is an ARKit thing, as ARCore is built
-    // on ARKit, and thus the rendering is handle by ARKit hence use ARKit's ARAnchor
     self.garAnchor = anchor;
     self.arAnchor = [[ARAnchor alloc] initWithTransform:anchor.transform];
+    [self.currentLoadAnchors removeObjectForKey:[anchor.identifier UUIDString]];
     [self.sceneView.session addAnchor:self.arAnchor];
-    [self enterState:ProgramStateResolvingFinished];
+    [self.currentDrawAnchors addObject:self.arAnchor];
+    [self.currentCloudAnchors addObject: anchor];
 }
 
 - (void)session:(GARSession *)session didFailToResolveAnchor:(GARAnchor *)anchor {
-    if (self.state != ProgramStateResolving || ![anchor isEqual:self.garAnchor]) {
-        return;
-    }
-    self.garAnchor = anchor;
-    [self enterState:ProgramStateResolvingFinished];
+    [self resolveAnchorWithIdentifier: self.currentLoadAnchors[[anchor.identifier UUIDString]]];
 }
 
 
@@ -678,8 +466,6 @@ typedef NS_ENUM(NSInteger, DialogType) {
 - (void)enterState:(ProgramState)state {
     switch (state) {
         case ProgramStateDefault:
-            self.currentRoom = nil;
-            
             for (ARAnchor * anchor in self.currentDrawAnchors) {
                 [self.sceneView.session removeAnchor:anchor];
             }
@@ -688,12 +474,11 @@ typedef NS_ENUM(NSInteger, DialogType) {
                 [self.gSession removeAnchor:anchor];
             }
             
-            self.currentDrawAnchors = [NSMutableArray new];
-            self.currentCloudAnchors = [NSMutableArray new];
+            [self.currentDrawAnchors removeAllObjects];
+            [self.currentCloudAnchors removeAllObjects];
             
-            [self toggleButton:self.btnCreate enabled:YES title:@"Create"];
-            [self toggleButton:self.btnJoin enabled:YES title:@"Join"];
-            [self toggleButton:self.btnEdit enabled:YES title:@"Edit"];
+            self.currentRoom = nil;
+            
             [self toggleButton:self.btnDelete enabled:NO title:@"Delete"];
             [self toggleButton:self.btnLeave enabled:NO title:@"Leave"];
             
@@ -724,34 +509,25 @@ typedef NS_ENUM(NSInteger, DialogType) {
             break;
         case ProgramStateCreatingRoom:
             self.message = [@"Creating " stringByAppendingString:self.roomCode];
-            [self toggleButton:self.btnCreate enabled:NO title:@"Create"];
-            [self toggleButton:self.btnJoin enabled:NO title:@"Join"];
-            [self toggleButton:self.btnEdit enabled:NO title:@"Edit"];
             [self toggleButton:self.btnDelete enabled:NO title:@"Delete"];
             [self toggleButton:self.btnLeave enabled:NO title:@"Leave"];
             break;
         case ProgramStateViewingRoom:
             self.message = [@"Viewing " stringByAppendingString:self.roomCode];
-            [self toggleButton:self.btnCreate enabled:NO title:@"Create"];
-            [self toggleButton:self.btnJoin enabled:NO title:@"Join"];
-            [self toggleButton:self.btnEdit enabled:NO title:@"Edit"];
             [self toggleButton:self.btnDelete enabled:NO title:@"Delete"];
             [self toggleButton:self.btnLeave enabled:YES title:@"Leave"];
             break;
         case ProgramStateEdittingRoom:
             self.message = [@"Editting " stringByAppendingString:self.roomCode];
-            [self toggleButton:self.btnCreate enabled:NO title:@"Create"];
-            [self toggleButton:self.btnJoin enabled:NO title:@"Join"];
-            [self toggleButton:self.btnEdit enabled:NO title:@"Edit"];
             [self toggleButton:self.btnDelete enabled:YES title:@"Delete"];
             [self toggleButton:self.btnLeave enabled:YES title:@"Leave"];
             break;
-        case ProgramStateHosting:
-            self.message = @"Hosting anchor...";
+        case ProgramStateSaving:
+            self.message = @"Saving anchor... Please hold still";
             break;
-        case ProgramStateHostingFinished:
+        case ProgramStateSavingFinished:
             self.message =
-            [NSString stringWithFormat:@"Finished hosting: %@",
+            [NSString stringWithFormat:@"Finished saving: %@",
              [self cloudStateString:self.garAnchor.cloudState]];
             break;
         case ProgramStateResolving:
@@ -780,22 +556,12 @@ typedef NS_ENUM(NSInteger, DialogType) {
                              style:UIAlertActionStyleDefault
                            handler:^(UIAlertAction *action) {
                                NSString *roomName = alertController.textFields[0].text;
-                               NSString *password = alertController.textFields[1].text;
                                if ([roomName length] == 0) {
                                    //[self enterState:ProgramStateDefault];
                                } else {
                                    //[self resolveAnchorWithRoomCode:roomCode];
                                    self.roomCode = roomName;
                                    switch (type) {
-                                       case DialogTypeCreate:
-                                           [self createRoom:roomName : password];
-                                           break;
-                                       case DialogTypeJoin:
-                                           [self joinRoom:roomName];
-                                           break;
-                                       case DialogTypeEdit:
-                                           [self editRoom:roomName : password];
-                                           break;
                                        case DialogTypeRename:
                                            [self renameRoom:roomName : [self.currentRoom getName]];
                                    }
@@ -810,12 +576,6 @@ typedef NS_ENUM(NSInteger, DialogType) {
                            }];
     [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
         textField.keyboardType = UIKeyboardTypeDefault;
-    }];
-    [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.keyboardType = UIKeyboardTypeDefault;
-        if (type != DialogTypeCreate && type != DialogTypeEdit) {
-            [textField setEnabled:false];
-        }
     }];
     [alertController addAction:okAction];
     [alertController addAction:cancelAction];

@@ -8,21 +8,21 @@
 #import <Foundation/Foundation.h>
 
 typedef NS_ENUM(NSInteger, AnchorType) {
-    AnchorTypeDefault,
-    AnchorTypePicture,
-    AnchorTypeVideo
+    AnchorTypeDefault = 0,
+    AnchorTypePicture = 1,
+    AnchorTypeVideo = 2
 };
 
 @interface ARObject : NSObject
 
-@property (strong, nonatomic) NSString *id;
-@property (strong, nonatomic) NSString *resourceName;
+@property (strong, nonatomic) NSString *anchorID;
+@property (strong, nonatomic) NSString *resourceID;
 @property (assign, nonatomic) AnchorType type;
 
-- (instancetype) initWithID: (NSString*) id type:(AnchorType) type resName:(NSString*) resName;
+- (instancetype) initWithID: (NSString*) anchor resource:(NSString*) resource type:(AnchorType) type;
 
-- (NSString *) getID;
-- (NSString *) getResourceName;
+- (NSString *) getAnchorID;
+- (NSString *) getResourceID;
 - (AnchorType) getType;
 
 @end

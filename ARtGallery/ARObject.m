@@ -9,22 +9,22 @@
 
 @implementation ARObject
 
-- (instancetype) initWithID: (NSString*) id type:(AnchorType) type resName:(NSString*) resName {
+- (instancetype) initWithID: (NSString*) anchor resource:(NSString*) resource type:(AnchorType) type {
     self = [super init];
     if (self) {
-        _id = id;
+        _anchorID = anchor;
+        _resourceID = resource;
         _type = type;
-        _resourceName = resName;
     }
     return self;
 }
 
-- (NSString *) getID {
-    return _id;
+- (NSString *) getAnchorID {
+    return _anchorID;
 }
 
-- (NSString *) getResourceName {
-    return _resourceName;
+- (NSString *) getResourceID {
+    return _resourceID;
 }
 
 - (AnchorType) getType {

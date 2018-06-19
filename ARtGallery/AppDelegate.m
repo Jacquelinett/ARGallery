@@ -19,6 +19,7 @@
 #import <FirebaseCore/FirebaseCore.h>
 
 #import "MainViewController.h"
+#import "GreetViewController.h"
 
 @interface AppDelegate ()
 
@@ -36,7 +37,7 @@
   [FIRApp configure];
 
   UIStoryboard* storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-  MainViewController* viewController = [storyBoard instantiateInitialViewController];
+  GreetViewController* viewController = [storyBoard instantiateInitialViewController];
   self.window.rootViewController = viewController;
 
   [self.window makeKeyAndVisible];

@@ -17,21 +17,25 @@
 #import <UIKit/UIKit.h>
 #import <SceneKit/SceneKit.h>
 #import <ARKit/ARKit.h>
+#import <FirebaseDatabase/FirebaseDatabase.h>
+#import "Room.h"
+#import "GreetViewController.h"
+
+typedef NS_ENUM(NSInteger, ViewType) {
+    ViewTypeEdit,
+    ViewTypeJoin
+};
 
 @interface MainViewController : UIViewController
 
 @property(nonatomic, strong) IBOutlet ARSCNView *sceneView;
-@property(nonatomic, strong) IBOutlet UIButton *btnCreate;
-@property(nonatomic, strong) IBOutlet UIButton *btnJoin;
-@property(nonatomic, strong) IBOutlet UIButton *btnEdit;
 @property(nonatomic, strong) IBOutlet UIButton *btnDelete;
 @property(nonatomic, strong) IBOutlet UIButton *btnLeave;
 @property(nonatomic, strong) IBOutlet UILabel *lblRoomName;
 @property(nonatomic, strong) IBOutlet UILabel *messageLabel;
 
-- (IBAction)btnCreate_pressed:(id)sender;
-- (IBAction)btnJoin_pressed:(id)sender;
-- (IBAction)btnEdit_pressed:(id)sender;
+- (void) setRoom:(Room *)room viewType : (ViewType) type;
+
 - (IBAction)btnDelete_pressed:(id)sender;
 - (IBAction)btnLeave_pressed:(id)sender;
 
