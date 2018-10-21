@@ -18,12 +18,16 @@
 		4F03739D20BEFB5D00316F67 /* Room.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F03739C20BEFB5D00316F67 /* Room.m */; };
 		4F0373A020BF089E00316F67 /* ARObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F03739F20BF089E00316F67 /* ARObject.m */; };
 		4F17276620D0385E00EF0E9F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F17276520D0385E00EF0E9F /* Security.framework */; };
-		4FDA2D8F20D46D06003A927E /* PSULogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 4FDA2D8E20D46D06003A927E /* PSULogo.png */; };
-		4FDA2D9120D46F92003A927E /* ARtGalleryLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 4FDA2D9020D46F92003A927E /* ARtGalleryLogo.png */; };
+		4F2EC6DD2110B592000C9259 /* ARMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F2EC6DC2110B592000C9259 /* ARMenuViewController.m */; };
+		4F3EB0C920FD28E5003D6F1F /* ARCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F3EB0C820FD28E5003D6F1F /* ARCollectionViewController.m */; };
+		4F50B62221065EBB005A54B6 /* Socket.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F50B62121065EBB005A54B6 /* Socket.m */; };
+		4F72F0A0210114E40072DFE9 /* ARCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F72F09F210114E40072DFE9 /* ARCollectionViewCell.m */; };
 		4FDA2D9420D471D6003A927E /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FDA2D9320D471D6003A927E /* LoginViewController.m */; };
 		4FDA2D9720D476FF003A927E /* GreetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FDA2D9620D476FF003A927E /* GreetViewController.m */; };
 		4FDA2D9A20D47719003A927E /* JoinViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FDA2D9920D47719003A927E /* JoinViewController.m */; };
-		D3904A8E92AD9EDB8E2673B8 /* libPods-ARtGallery.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A07FE2107FC2BE33450A2BDC /* libPods-ARtGallery.a */; settings = {ATTRIBUTES = (Required, ); }; };
+		4FDA2DA220D98F9E003A927E /* NavigationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FDA2DA120D98F9E003A927E /* NavigationViewController.m */; };
+		4FDA2DA520D9DFF8003A927E /* MenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FDA2DA420D9DFF8003A927E /* MenuViewController.m */; };
+		6A2DD3411BC3870179C47309 /* Pods_ARtGallery.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E47A0ADD69E1312D9774582 /* Pods_ARtGallery.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,17 +50,27 @@
 		4F03739E20BF089E00316F67 /* ARObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARObject.h; sourceTree = "<group>"; };
 		4F03739F20BF089E00316F67 /* ARObject.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ARObject.m; sourceTree = "<group>"; };
 		4F17276520D0385E00EF0E9F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
-		4FDA2D8E20D46D06003A927E /* PSULogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PSULogo.png; path = ../../../../Downloads/PSULogo.png; sourceTree = "<group>"; };
-		4FDA2D9020D46F92003A927E /* ARtGalleryLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ARtGalleryLogo.png; path = ../../../../Downloads/ARtGalleryLogo.png; sourceTree = "<group>"; };
+		4F2EC6DB2110B592000C9259 /* ARMenuViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARMenuViewController.h; sourceTree = "<group>"; };
+		4F2EC6DC2110B592000C9259 /* ARMenuViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ARMenuViewController.m; sourceTree = "<group>"; };
+		4F3EB0C720FD28E5003D6F1F /* ARCollectionViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARCollectionViewController.h; sourceTree = "<group>"; };
+		4F3EB0C820FD28E5003D6F1F /* ARCollectionViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ARCollectionViewController.m; sourceTree = "<group>"; };
+		4F50B62021065EBA005A54B6 /* Socket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Socket.h; sourceTree = "<group>"; };
+		4F50B62121065EBB005A54B6 /* Socket.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Socket.m; sourceTree = "<group>"; };
+		4F72F09E210114E40072DFE9 /* ARCollectionViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARCollectionViewCell.h; sourceTree = "<group>"; };
+		4F72F09F210114E40072DFE9 /* ARCollectionViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ARCollectionViewCell.m; sourceTree = "<group>"; };
 		4FDA2D9220D471D6003A927E /* LoginViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
 		4FDA2D9320D471D6003A927E /* LoginViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		4FDA2D9520D476FF003A927E /* GreetViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GreetViewController.h; sourceTree = "<group>"; };
 		4FDA2D9620D476FF003A927E /* GreetViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GreetViewController.m; sourceTree = "<group>"; };
 		4FDA2D9820D47719003A927E /* JoinViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JoinViewController.h; sourceTree = "<group>"; };
 		4FDA2D9920D47719003A927E /* JoinViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JoinViewController.m; sourceTree = "<group>"; };
+		4FDA2DA020D98F9E003A927E /* NavigationViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NavigationViewController.h; sourceTree = "<group>"; };
+		4FDA2DA120D98F9E003A927E /* NavigationViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NavigationViewController.m; sourceTree = "<group>"; };
+		4FDA2DA320D9DFF8003A927E /* MenuViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MenuViewController.h; sourceTree = "<group>"; };
+		4FDA2DA420D9DFF8003A927E /* MenuViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MenuViewController.m; sourceTree = "<group>"; };
 		61F9E7B651EF06410CCEF64C /* Pods-ARtGallery.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARtGallery.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARtGallery/Pods-ARtGallery.debug.xcconfig"; sourceTree = "<group>"; };
+		6E47A0ADD69E1312D9774582 /* Pods_ARtGallery.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ARtGallery.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9520C75C7C4D3ACF4F7A3A24 /* Pods-CloudAnchorExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CloudAnchorExample.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CloudAnchorExample/Pods-CloudAnchorExample.debug.xcconfig"; sourceTree = "<group>"; };
-		A07FE2107FC2BE33450A2BDC /* libPods-ARtGallery.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ARtGallery.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,7 +79,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4F17276620D0385E00EF0E9F /* Security.framework in Frameworks */,
-				D3904A8E92AD9EDB8E2673B8 /* libPods-ARtGallery.a in Frameworks */,
+				6A2DD3411BC3870179C47309 /* Pods_ARtGallery.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,31 +107,73 @@
 		0285F7F4208A82B900A7B463 /* ARtGallery */ = {
 			isa = PBXGroup;
 			children = (
+				4F50B62521065F47005A54B6 /* Core */,
+				4F50B62421065EEA005A54B6 /* UIClasses */,
 				02797975208FD32A00DFCBEB /* example.scnassets */,
+				0285F80F208A834200A7B463 /* GoogleService-Info.plist */,
+				0285F7F5208A82B900A7B463 /* AppDelegate.h */,
+				0285F7F6208A82B900A7B463 /* AppDelegate.m */,
+				0285F7FB208A82B900A7B463 /* Main.storyboard */,
+				0285F7FE208A82B900A7B463 /* Assets.xcassets */,
+				0285F800208A82B900A7B463 /* LaunchScreen.storyboard */,
+				0285F803208A82B900A7B463 /* Info.plist */,
+				0285F804208A82B900A7B463 /* main.m */,
+			);
+			path = ARtGallery;
+			sourceTree = "<group>";
+		};
+		4F2EC6D6210D1A12000C9259 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				4FDA2DA320D9DFF8003A927E /* MenuViewController.h */,
+				4FDA2DA420D9DFF8003A927E /* MenuViewController.m */,
+				4F3EB0C720FD28E5003D6F1F /* ARCollectionViewController.h */,
+				4F3EB0C820FD28E5003D6F1F /* ARCollectionViewController.m */,
+				4F72F09E210114E40072DFE9 /* ARCollectionViewCell.h */,
+				4F72F09F210114E40072DFE9 /* ARCollectionViewCell.m */,
 				0285F80E208A834200A7B463 /* MainViewController.h */,
 				0285F80D208A834100A7B463 /* MainViewController.m */,
+				4FDA2DA020D98F9E003A927E /* NavigationViewController.h */,
+				4FDA2DA120D98F9E003A927E /* NavigationViewController.m */,
+				4F2EC6DB2110B592000C9259 /* ARMenuViewController.h */,
+				4F2EC6DC2110B592000C9259 /* ARMenuViewController.m */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		4F2EC6D7210D1A23000C9259 /* Login */ = {
+			isa = PBXGroup;
+			children = (
 				4FDA2D9220D471D6003A927E /* LoginViewController.h */,
 				4FDA2D9320D471D6003A927E /* LoginViewController.m */,
 				4FDA2D9520D476FF003A927E /* GreetViewController.h */,
 				4FDA2D9620D476FF003A927E /* GreetViewController.m */,
 				4FDA2D9820D47719003A927E /* JoinViewController.h */,
 				4FDA2D9920D47719003A927E /* JoinViewController.m */,
-				0285F80F208A834200A7B463 /* GoogleService-Info.plist */,
-				0285F7F5208A82B900A7B463 /* AppDelegate.h */,
-				0285F7F6208A82B900A7B463 /* AppDelegate.m */,
-				0285F7FB208A82B900A7B463 /* Main.storyboard */,
-				0285F7FE208A82B900A7B463 /* Assets.xcassets */,
-				4FDA2D9020D46F92003A927E /* ARtGalleryLogo.png */,
-				4FDA2D8E20D46D06003A927E /* PSULogo.png */,
-				0285F800208A82B900A7B463 /* LaunchScreen.storyboard */,
-				0285F803208A82B900A7B463 /* Info.plist */,
-				0285F804208A82B900A7B463 /* main.m */,
+			);
+			path = Login;
+			sourceTree = "<group>";
+		};
+		4F50B62421065EEA005A54B6 /* UIClasses */ = {
+			isa = PBXGroup;
+			children = (
+				4F2EC6D7210D1A23000C9259 /* Login */,
+				4F2EC6D6210D1A12000C9259 /* Main */,
+			);
+			path = UIClasses;
+			sourceTree = "<group>";
+		};
+		4F50B62521065F47005A54B6 /* Core */ = {
+			isa = PBXGroup;
+			children = (
 				4F03739B20BEFB5D00316F67 /* Room.h */,
 				4F03739C20BEFB5D00316F67 /* Room.m */,
 				4F03739E20BF089E00316F67 /* ARObject.h */,
 				4F03739F20BF089E00316F67 /* ARObject.m */,
+				4F50B62021065EBA005A54B6 /* Socket.h */,
+				4F50B62121065EBB005A54B6 /* Socket.m */,
 			);
-			path = ARtGallery;
+			path = Core;
 			sourceTree = "<group>";
 		};
 		5A1E3347CAAFAAF684FFC1E8 /* Pods */ = {
@@ -135,7 +191,7 @@
 			isa = PBXGroup;
 			children = (
 				4F17276520D0385E00EF0E9F /* Security.framework */,
-				A07FE2107FC2BE33450A2BDC /* libPods-ARtGallery.a */,
+				6E47A0ADD69E1312D9774582 /* Pods_ARtGallery.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -152,6 +208,7 @@
 				0285F7EF208A82B900A7B463 /* Frameworks */,
 				0285F7F0208A82B900A7B463 /* Resources */,
 				7F00B32E3CAB8589F1DE950C /* [CP] Copy Pods Resources */,
+				9BDBB48FB3A206B611950D92 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -200,8 +257,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				02797976208FD32A00DFCBEB /* example.scnassets in Resources */,
-				4FDA2D8F20D46D06003A927E /* PSULogo.png in Resources */,
-				4FDA2D9120D46F92003A927E /* ARtGalleryLogo.png in Resources */,
 				0285F802208A82B900A7B463 /* LaunchScreen.storyboard in Resources */,
 				0285F811208A834200A7B463 /* GoogleService-Info.plist in Resources */,
 				0285F7FF208A82B900A7B463 /* Assets.xcassets in Resources */,
@@ -248,6 +303,38 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ARtGallery/Pods-ARtGallery-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		9BDBB48FB3A206B611950D92 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-ARtGallery/Pods-ARtGallery-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
+				"${BUILT_PRODUCTS_DIR}/Protobuf/Protobuf.framework",
+				"${BUILT_PRODUCTS_DIR}/RNCryptor-objc/RNCryptor_objc.framework",
+				"${BUILT_PRODUCTS_DIR}/Socket.IO-Client-Swift/SocketIO.framework",
+				"${BUILT_PRODUCTS_DIR}/Starscream/Starscream.framework",
+				"${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTMSessionFetcher.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Protobuf.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RNCryptor_objc.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SocketIO.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Starscream.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/leveldb.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ARtGallery/Pods-ARtGallery-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -256,13 +343,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				4F0373A020BF089E00316F67 /* ARObject.m in Sources */,
+				4FDA2DA220D98F9E003A927E /* NavigationViewController.m in Sources */,
+				4F2EC6DD2110B592000C9259 /* ARMenuViewController.m in Sources */,
 				0285F810208A834200A7B463 /* MainViewController.m in Sources */,
 				4FDA2D9420D471D6003A927E /* LoginViewController.m in Sources */,
 				0285F805208A82B900A7B463 /* main.m in Sources */,
 				4FDA2D9720D476FF003A927E /* GreetViewController.m in Sources */,
 				4F03739D20BEFB5D00316F67 /* Room.m in Sources */,
 				4FDA2D9A20D47719003A927E /* JoinViewController.m in Sources */,
+				4F50B62221065EBB005A54B6 /* Socket.m in Sources */,
 				0285F7F7208A82B900A7B463 /* AppDelegate.m in Sources */,
+				4F3EB0C920FD28E5003D6F1F /* ARCollectionViewController.m in Sources */,
+				4FDA2DA520D9DFF8003A927E /* MenuViewController.m in Sources */,
+				4F72F0A0210114E40072DFE9 /* ARCollectionViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -400,6 +493,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 61F9E7B651EF06410CCEF64C /* Pods-ARtGallery.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -419,6 +513,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 06AA38AC71652E04D47E7D79 /* Pods-ARtGallery.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
