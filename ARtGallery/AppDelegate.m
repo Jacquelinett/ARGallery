@@ -15,12 +15,7 @@
  */
 
 #import "AppDelegate.h"
-
-#import <FirebaseCore/FirebaseCore.h>
-
-#import "MainViewController.h"
 #import "GreetViewController.h"
-#import "Socket.h"
 
 @interface AppDelegate ()
 
@@ -34,8 +29,6 @@
   [UIApplication sharedApplication].idleTimerDisabled = YES;
 
   self.window = [[UIWindow alloc] init];
-
-  [FIRApp configure];
 
   UIStoryboard* storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
   //  [[Socket instance] start];

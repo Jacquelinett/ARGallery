@@ -10,8 +10,9 @@
 
 @interface ARMenuViewController : UIViewController
 
-@property (weak, nonatomic) ARCollectionViewController * parent;
-@property(strong, nonatomic) SocketIOClient* socket;
+@property (weak, nonatomic) ARCollectionViewController *parent;
+
+@property (strong, nonatomic) SocketIOClient *socket;
 
 @property (weak, nonatomic) ARObject *controlling;
 
@@ -23,6 +24,6 @@
 - (IBAction)btnBack_pressed:(id)sender;
 - (IBAction)btnReplace_pressed:(id)sender;
 
-- (void) initialize: (ARCollectionViewController *) parent : (SocketIOClient*)socket : (ARObject *) controlling;
+- (void) initialize: (ARCollectionViewController *)parent object:(ARObject *)controlling;
 
 @end

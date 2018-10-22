@@ -19,6 +19,8 @@ static NSString * const reuseIdentifier = @"Cell";
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.parent = (NavigationViewController *)self.tabBarController;
+    
     // Uncomment the following line to preserve selection between presentations
     // self.clearsSelectionOnViewWillAppear = NO;
     
@@ -48,13 +50,13 @@ static NSString * const reuseIdentifier = @"Cell";
     
     if ([[segue identifier] isEqualToString:@"segOption"]) {
         ARMenuViewController *viewController = [segue destinationViewController];
-        [viewController initialize:self : _socket : [_objectList objectAtIndex: _lastSelectedIndex ]];
+        [viewController initialize:self object:[self.parent.room.objectList objectAtIndex: _lastSelectedIndex ]];
     }
 }
 
 
 - (ARObject *) getARObjectFromIndexPath : (NSIndexPath *)indexPath {
-    return self.objectList[indexPath.row];
+    return self.parent.room.objectList[indexPath.row];
 }
 
 #pragma mark <UICollectionViewDataSource>
@@ -65,7 +67,7 @@ static NSString * const reuseIdentifier = @"Cell";
 
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return self.objectList.count + 1;
+    return self.parent.room.objectList.count + 1;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
@@ -79,8 +81,8 @@ static NSString * const reuseIdentifier = @"Cell";
     else {
         //cell.backgroundColor = UIColor.yellowColor;
         //cell.imageView.image = [UIImage imageNamed: @"Elon_Musk_2015"];
-        ARObject * o = [_objectList objectAtIndex:(indexPath.row - 1)];
-        cell.imageView.image = _resourceDictionary[[o getAnchorID]];
+        ARObject * o = [self.parent.room.objectList objectAtIndex:(indexPath.row - 1)];
+        cell.imageView.image = self.storage.imageDictionary[[o resourceID]];
     }
     
     return cell;
@@ -129,7 +131,7 @@ static NSString * const reuseIdentifier = @"Cell";
     
     self.tabBarController.selectedIndex = 0;
     MainViewController * view = [self.tabBarController.viewControllers objectAtIndex:0];
-    [view initializeAddMode:info[UIImagePickerControllerEditedImage] :_socket];
+    [view initializeAddMode:info[UIImagePickerControllerEditedImage]];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
@@ -169,20 +171,18 @@ static NSString * const reuseIdentifier = @"Cell";
 }
 */
 
-- (void) initialize:(NSMutableArray *)objectList : (NSMutableDictionary *) resourceDictionary :(SocketIOClient *)socket {
-    self.objectList = objectList;
-    self.resourceDictionary = resourceDictionary;
+- (void) initialize{
     [self.collectionView reloadData];
     
     if (!self.socket) {
-        self.socket = socket;
+        self.socket = self.parent.socket;
     }
 }
 
 - (void) removeARObject : (ARObject *) removed {
     MainViewController * view = [self.tabBarController.viewControllers objectAtIndex:0];
-    [view removeARObject:[removed getAnchorID]];
-    [self.objectList removeObject:removed];
+    [view removeARObject:removed.anchorID];
+    [self.parent.room.objectList removeObject:removed];
     
     [self.collectionView reloadData];
 }

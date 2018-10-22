@@ -37,7 +37,7 @@
  }*/
 
 - (IBAction)btnDelete_pressed:(id)sender {
-    [_socket emit: @"removeARObject" with: @[[_controlling getAnchorID]]];
+    [_socket emit: @"removeARObject" with: @[self.controlling.anchorID]];
 
 }
 
@@ -50,13 +50,13 @@
 
 }
 
-- (void) initialize:(ARCollectionViewController *) parent :(SocketIOClient*)socket : (ARObject *) controlling {
+- (void) initialize:(ARCollectionViewController *)parent object:(ARObject *)controlling {
     _controlling = controlling;
     if (!_parent) {
         _parent = parent;
     }
     if (!_socket) {
-        _socket = socket;
+        _socket = _parent.socket;
         
         [_socket on:@"ARObjectRemovedSuccessful" callback:^(NSArray* data, SocketAckEmitter* ack) {
             //NSLog(@"Room don't exist");

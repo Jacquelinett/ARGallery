@@ -8,22 +8,24 @@
 #import <UIKit/UIKit.h>
 #import "MainViewController.h"
 #import "ARCollectionViewCell.h"
+#import "NavigationViewController.h"
 #import "ARObject.h"
+#import "Storage.h"
 
 @class ARMenuViewController;
+@class NavigationViewController;
 
 @import SocketIO;
 
 @interface ARCollectionViewController : UICollectionViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
-@property(strong, nonatomic) SocketIOClient* socket;
+@property (strong, nonatomic) SocketIOClient *socket;
+@property (strong, nonatomic) Storage *storage;
+@property (strong, nonatomic) NavigationViewController* parent;
 
-@property(nonatomic, strong) NSMutableArray *objectList;
-@property(nonatomic, strong) NSDictionary *resourceDictionary;
+@property (assign, nonatomic) int lastSelectedIndex;
 
-@property(nonatomic, assign) int lastSelectedIndex;
-
-- (void) initialize:(NSMutableArray *) objectList : (NSMutableDictionary *) resourceDictionary : (SocketIOClient *) socket;
-- (void) removeARObject : (ARObject *) removed;
+- (void) initialize;
+- (void) removeARObject:(ARObject *)removed;
 
 @end
