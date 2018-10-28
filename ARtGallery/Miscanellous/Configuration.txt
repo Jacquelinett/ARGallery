@@ -1,0 +1,7 @@
+serverAddress = @"http://172.28.246.33:8900"
+localAddress = @"http://192.168.1.113:8900"
+
+gAPIKey = @"AIzaSyDr4a1eInnG_-oQeNKsJAdYdERdpwmt4sY"
+bundleIdentifier = @"com.jacqueline.artgallery"
+
+

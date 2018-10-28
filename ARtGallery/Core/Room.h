@@ -12,16 +12,13 @@
 
 @property (strong, nonatomic) NSString *name;
 @property (strong, nonatomic) NSMutableArray *objectList;
+@property (strong, nonatomic) NSMutableDictionary *objectReferences;
 
 // Future to do:
 // Add lists of currently connected users
 
-- (instancetype) initWithName:(NSString *) roomName;
-
-- (void) addARObject : (ARObject *) object;
-
-- (void) setName : (NSString *) name;
-- (NSString *) getName;
+- (instancetype)initWithName:(NSString *)roomName;
+- (instancetype)initWithDictionary:(NSDictionary *)dictionary;
 
 @end
 
