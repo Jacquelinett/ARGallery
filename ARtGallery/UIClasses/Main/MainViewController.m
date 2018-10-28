@@ -36,8 +36,8 @@ typedef NS_ENUM(NSInteger, DialogType) {
     // These just initialize scene/storyboard stuff + firebase and google stuff
     self.sceneView.delegate = self;
     self.sceneView.session.delegate = self;
-    self.gSession = [GARSession sessionWithAPIKey:@"X"
-                                 bundleIdentifier:@"X"
+    self.gSession = [GARSession sessionWithAPIKey:@"AIzaSyDr4a1eInnG_-oQeNKsJAdYdERdpwmt4sY"
+                                 bundleIdentifier:@"com.jacqueline.artgallery"
                                             error:nil];
     
     self.gSession.delegate = self;
@@ -50,7 +50,9 @@ typedef NS_ENUM(NSInteger, DialogType) {
     self.drawAnchors = [NSMutableArray new];
     self.drawnAnchors = [NSMutableDictionary new];
     self.cloudAnchors = [NSMutableArray new];
+    
     self.loadList = [NSMutableDictionary new];
+    self.loadingList = [NSMutableDictionary new];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -66,7 +68,7 @@ typedef NS_ENUM(NSInteger, DialogType) {
 
 - (void)session:(ARSession *)session cameraDidChangeTrackingState:(ARCamera *)camera {
     if (camera.trackingState == ARTrackingStateNormal) {
-        [self.loadList removeAllObjects];
+        [self.loadingList removeAllObjects];
         [NSTimer scheduledTimerWithTimeInterval:1
                                          target:self
                                        selector:@selector(loadRemainingAnchors)
@@ -143,7 +145,7 @@ typedef NS_ENUM(NSInteger, DialogType) {
         self.socket = self.parent.socket;
         
         [self.socket on:@"ARObjectCreatedSuccessful" callback:^(NSArray* data, SocketAckEmitter* ack) {
-            self.message = @"Object successfully saved to the server";
+            [self.messageLabel setText:@"Object successfully saved to the server"];
             
             self.storage.imageDictionary[[data objectAtIndex:0]] = self.imgToAdd;
             
@@ -201,7 +203,6 @@ typedef NS_ENUM(NSInteger, DialogType) {
 - (void)loadRemainingAnchors {
     for(id key in self.loadList) {
         [self resolveAnchorWithIdentifier:self.loadList[key]];
-        [self.loadList removeObjectForKey:key];
     }
 }
 
@@ -216,7 +217,7 @@ typedef NS_ENUM(NSInteger, DialogType) {
         NSLog(@"Attempted to load");
         GARAnchor * anchor = [self.gSession resolveCloudAnchorWithIdentifier:identifier error:nil];
         if (anchor)
-            [self.loadList setValue:identifier forKey:[anchor.identifier UUIDString]];
+            [self.loadingList setValue:identifier forKey:[anchor.identifier UUIDString]];
     }
 }
 
@@ -267,7 +268,8 @@ typedef NS_ENUM(NSInteger, DialogType) {
     NSLog(@"Succeeded");
     self.garAnchor = anchor;
     [self.cloudAnchors addObject: anchor];
-    [self.loadList removeObjectForKey:[anchor.identifier UUIDString]];
+    [self.loadingList removeObjectForKey:[anchor.identifier UUIDString]];
+    [self.loadList removeObjectForKey:anchor.cloudIdentifier];
     
     ARObject *r = [self.room.objectList objectAtIndex:[[self.room.objectReferences objectForKey:anchor.cloudIdentifier] integerValue]];
     
@@ -285,7 +287,7 @@ typedef NS_ENUM(NSInteger, DialogType) {
 
 - (void)session:(GARSession *)session didFailToResolveAnchor:(GARAnchor *)anchor {
     NSLog(@"Failed");
-    [self resolveAnchorWithIdentifier: self.loadList[[anchor.identifier UUIDString]]];
+    [self resolveAnchorWithIdentifier: self.loadingList[[anchor.identifier UUIDString]]];
 }
 
 
@@ -301,11 +303,6 @@ typedef NS_ENUM(NSInteger, DialogType) {
 
 # pragma mark - Helper Methods
 // These belows are pretty self-explanatory
-
-- (void)updateMessageLabel {
-    [self.messageLabel setText:self.message];
-    self.lblRoomName.text = [NSString stringWithFormat:@"Room: %@", self.room.name];
-}
 
 - (void)toggleButton:(UIButton *)button enabled:(BOOL)enabled title:(NSString *)title {
     button.enabled = enabled;
@@ -365,46 +362,44 @@ typedef NS_ENUM(NSInteger, DialogType) {
             [self clearScreen];
             
             self.room = nil;
-            self.message = @"";
+            [self.messageLabel setText:@""];
             
             break;
         case ProgramStateAddingToRoom:
-            self.message = @"Tap anywhere on the screen to add image";
+            [self.messageLabel setText:@"Tap anywhere on the screen to add image"];
             break;
         case ProgramStateAddConfirm:
-            self.message = @"Press confirm to confirm location";
+            [self.messageLabel setText:@"Press confirm to confirm location"];
             self.sldSize.hidden = NO;
             self.btnCancelAdd.hidden = NO;
             self.btnConfirmAdd.hidden = NO;
             break;
         case ProgramStateViewingRoom:
-            self.message = [@"Viewing " stringByAppendingString:self.room.name];
+            [self.messageLabel setText:[@"Viewing " stringByAppendingString:self.room.name]];
             break;
         case ProgramStateEdittingRoom:
-            self.message = [@"Editting " stringByAppendingString:self.room.name];
+            [self.messageLabel setText:[@"Editting " stringByAppendingString:self.room.name]];
             break;
         case ProgramStateSaving:
-            self.message = @"Saving anchor... Please hold still";
+            [self.messageLabel setText:@"Saving anchor... Please hold still"];
             break;
         case ProgramStateSavingFinished:
-            self.message =
-            [NSString stringWithFormat:@"Finished saving: %@",
-             [self cloudStateString:self.garAnchor.cloudState]];
+            [self.messageLabel setText: [NSString stringWithFormat:@"Finished saving: %@", [self cloudStateString:self.garAnchor.cloudState]]];
             break;
         case ProgramStateResolving:
             [self dismissViewControllerAnimated:NO completion:^{}];
-            self.message = @"Resolving anchor...";
+            [self.messageLabel setText:@"Resolving anchor..."];
             //[self toggleButton:self.hostButton enabled:NO title:@"HOST"];
             //[self toggleButton:self.resolveButton enabled:YES title:@"CANCEL"];
             break;
         case ProgramStateResolvingFinished:
-            self.message =
+            [self.messageLabel setText:
             [NSString stringWithFormat:@"Finished resolving: %@",
-             [self cloudStateString:self.garAnchor.cloudState]];
+              [self cloudStateString:self.garAnchor.cloudState]]];
             break;
     }
     self.state = state;
-    [self updateMessageLabel];
+    self.lblRoomName.text = [NSString stringWithFormat:@"Room: %@", self.room.name];
 }
 
 #pragma mark - ARSCNViewDelegate

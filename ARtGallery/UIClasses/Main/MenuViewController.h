@@ -7,10 +7,16 @@
 
 #import <UIKit/UIKit.h>
 
+#import "NavigationViewController.h"
+
+@class NavigationViewController;
+
 @import SocketIO;
+
 @interface MenuViewController : UIViewController
 
 @property (strong, nonatomic) SocketIOClient *socket;
+@property (strong, nonatomic) NavigationViewController* parent;
 
 @property (weak, nonatomic) IBOutlet UILabel *lblStatus;
 @property (weak, nonatomic) IBOutlet UIButton *btnRename;

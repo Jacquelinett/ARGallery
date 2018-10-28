@@ -18,6 +18,7 @@
 @import SocketIO;
 
 @class MainViewController;
+@class MenuViewController;
 
 @interface NavigationViewController : UITabBarController <UITabBarControllerDelegate>
 

@@ -14,18 +14,12 @@
     self.room = room;
     self.viewType = type;
     
-    self.menuView = (MenuViewController *)[self.viewControllers objectAtIndex:2];
-    
     switch(type) {
         case ViewTypeEdit:
             self.tabBar.items[1].enabled = YES;
-            self.menuView.btnDelete.enabled = YES;
-            self.menuView.btnRename.enabled = YES;
             break;
         case ViewTypeJoin:
             self.tabBar.items[1].enabled = NO;
-            self.menuView.btnDelete.enabled = NO;
-            self.menuView.btnRename.enabled = NO;
             break;
     }
     
@@ -44,7 +38,9 @@
     self.delegate = self;
     
     self.mainView = [self.viewControllers objectAtIndex:0];
+    self.menuView = (MenuViewController *)[self.viewControllers objectAtIndex:2];
     [self.mainView initialize];
+    [self.menuView initialize];
 }
 
 - (void)tabBarController:(UITabBarController *)tabBarController

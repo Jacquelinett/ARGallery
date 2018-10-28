@@ -71,13 +71,13 @@ typedef NS_ENUM(NSInteger, ProgramState) {
 @property (weak, nonatomic) IBOutlet UISlider *sldSize;
 @property (weak, nonatomic) IBOutlet UIButton *btnCancelAdd;
 @property (weak, nonatomic) IBOutlet UIButton *btnConfirmAdd;
-@property (weak, nonatomic) NSString *message;
 
 @property (strong, nonatomic) NSMutableArray *drawAnchors;
 @property (strong, nonatomic) NSMutableDictionary *drawnAnchors;
 @property (strong, nonatomic) NSMutableArray *cloudAnchors;
 
 @property (strong, nonatomic) NSMutableDictionary *loadList;
+@property (strong, nonatomic) NSMutableDictionary *loadingList;
 
 @property (strong, nonatomic) UIImage *imgToAdd;
 @property (assign, nonatomic) float scalingFactor;

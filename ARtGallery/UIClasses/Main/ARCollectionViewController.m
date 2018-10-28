@@ -82,7 +82,8 @@ static NSString * const reuseIdentifier = @"Cell";
         //cell.backgroundColor = UIColor.yellowColor;
         //cell.imageView.image = [UIImage imageNamed: @"Elon_Musk_2015"];
         ARObject * o = [self.parent.room.objectList objectAtIndex:(indexPath.row - 1)];
-        cell.imageView.image = self.storage.imageDictionary[[o resourceID]];
+        UIImage * test = self.parent.storage.imageDictionary[o.resourceID];
+        cell.imageView.image = self.parent.storage.imageDictionary[o.resourceID];
     }
     
     return cell;

@@ -6,4 +6,4 @@ pod 'Firebase/Database', '~> 4.11'
 pod 'RNCryptor-objc', '~> 3.0.6'
 
 use_frameworks!
-pod 'Socket.IO-Client-Swift', '~> 13.2.0'
+pod 'Socket.IO-Client-Swift', '~> 13.3.0'

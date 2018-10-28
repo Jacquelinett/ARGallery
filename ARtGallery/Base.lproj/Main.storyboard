@@ -334,6 +334,7 @@
         <!--Greet View Controller-->
         <scene sceneID="kwt-44-13o">
             <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="AvD-o7-eWi" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <viewController storyboardIdentifier="GreetViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="yS6-9q-CsS" customClass="GreetViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Y1U-Ia-Q8G">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
@@ -391,7 +392,6 @@
                         <segue destination="d61-5C-biP" kind="presentation" identifier="segLogin" id="SdR-MT-w6g"/>
                     </connections>
                 </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="AvD-o7-eWi" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-1162" y="29"/>
         </scene>

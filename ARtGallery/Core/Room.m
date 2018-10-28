@@ -26,13 +26,13 @@
         self.objectList = [NSMutableArray new];
         self.objectReferences = [NSMutableDictionary new];
         
-        NSDictionary *objectList = dictionary[@"objectself.list"];
+        NSDictionary *objectList = dictionary[@"object_list"];
         if (![objectList isEqual:[NSNull null]]) {
             for(id key in objectList) {
                 NSDictionary * value = [objectList objectForKey:key];
                 
-                NSString *anchor = value[@"anchorself.identifier"];
-                NSString *resource = value[@"resourceself.identifier"];
+                NSString *anchor = value[@"anchor_identifier"];
+                NSString *resource = value[@"resource_identifier"];
                 float scaling = [value[@"scaling"] floatValue];
                 NSNumber *type = value[@"type"];
                 

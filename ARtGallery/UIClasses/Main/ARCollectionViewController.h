@@ -20,7 +20,6 @@
 @interface ARCollectionViewController : UICollectionViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
 @property (strong, nonatomic) SocketIOClient *socket;
-@property (strong, nonatomic) Storage *storage;
 @property (strong, nonatomic) NavigationViewController* parent;
 
 @property (assign, nonatomic) int lastSelectedIndex;

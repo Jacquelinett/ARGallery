@@ -15,6 +15,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.parent = (NavigationViewController *)self.tabBarController;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -28,6 +29,7 @@
 
 - (void) initialize {
     if (!_socket) {
+        self.socket = self.parent.socket;
         [_socket on:@"roomWithNewNameAlreadyExist" callback:^(NSArray* data, SocketAckEmitter* ack) {
             [self.lblStatus setTextColor:UIColor.redColor];
             [self.lblStatus setText:@"Another room with same name already exist"];
@@ -40,9 +42,21 @@
         
         [_socket on:@"roomDeleted" callback:^(NSArray* data, SocketAckEmitter* ack) {
             [self.lblStatus setText:@""];
-            [self performSegueWithIdentifier:@"segSee" sender:nil];
+            [self dismissViewControllerAnimated:YES completion:nil];
         }];
     }
+    
+    switch(self.parent.viewType) {
+        case ViewTypeEdit:
+            self.btnDelete.enabled = YES;
+            self.btnRename.enabled = YES;
+            break;
+        case ViewTypeJoin:
+            self.btnDelete.enabled = NO;
+            self.btnRename.enabled = NO;
+            break;
+    }
+    
 }
 
 - (IBAction)btnRename_pressed:(id)sender {
@@ -50,7 +64,8 @@
 }
 
 - (IBAction)btnDelete_pressed:(id)sender {
-    [_socket emit: @"deleteRoom" with: @[@""]];
+    [self.lblStatus setText:@"Deleting..."];
+    [_socket emit: @"deleteRoom" with: @[self.parent.room.name]];
 }
 
 - (IBAction)btnLeave_pressed:(id)sender {
