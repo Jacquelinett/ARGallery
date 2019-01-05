@@ -58,8 +58,14 @@ typedef NS_ENUM(NSInteger, DialogType) {
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    [self.sceneView.session runWithConfiguration:self.configuration];
+    //[self.sceneView.session pause];
     
+    //[self.sceneView.scene.rootNode enumerateChildNodesUsingBlock:(^(SCNNode * _Nonnull child, BOOL * _Nonnull stop) {
+    //    [child removeFromParentNode];
+    //})];
+    
+    [self.sceneView.session runWithConfiguration:self.configuration];
+    //[self.sceneView.session runWithConfiguration:self.configuration options:ARSessionRunOptionResetTracking];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -83,19 +89,32 @@ typedef NS_ENUM(NSInteger, DialogType) {
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    if (touches.count >= 1 && self.state == ProgramStateAddingToRoom) {
+    if (touches.count >= 1) {
         UITouch *touch = [[touches allObjects] firstObject];
         CGPoint touchLocation = [touch locationInView:self.sceneView];
         
-        NSArray *hitTestResults =
-        [self.sceneView hitTest:touchLocation
-                          types:ARHitTestResultTypeExistingPlane |
-         ARHitTestResultTypeExistingPlaneUsingExtent |
-         ARHitTestResultTypeEstimatedHorizontalPlane];
-        
-        if (hitTestResults.count > 0) {
-            ARHitTestResult *result = [hitTestResults firstObject];
-            [self addTemporaryAnchor:result.worldTransform];
+        if (self.state == ProgramStateAddingToRoom) {
+            NSArray *hitTestResults =
+            [self.sceneView hitTest:touchLocation
+                              types:ARHitTestResultTypeExistingPlane |
+             ARHitTestResultTypeExistingPlaneUsingExtent |
+             ARHitTestResultTypeEstimatedHorizontalPlane];
+            
+            if (hitTestResults.count > 0) {
+                ARHitTestResult *result = [hitTestResults firstObject];
+                [self addTemporaryAnchor:result.worldTransform];
+            }
+        }
+        else if (self.state == ProgramStateEdittingRoom || self.state == ProgramStateViewingRoom) {
+            NSArray *hitTestResults = [self.sceneView hitTest:touchLocation options:nil];
+            
+            if (hitTestResults.count > 0) {
+                SCNHitTestResult *scn = [hitTestResults firstObject];
+                if ([scn.node isKindOfClass:[ARVideoNode class]]) {
+                    ARVideoNode * node = (ARVideoNode *)scn.node;
+                    [node playVideo];
+                }
+            }
         }
     }
 }
@@ -147,12 +166,21 @@ typedef NS_ENUM(NSInteger, DialogType) {
         [self.socket on:@"ARObjectCreatedSuccessful" callback:^(NSArray* data, SocketAckEmitter* ack) {
             [self.messageLabel setText:@"Object successfully saved to the server"];
             
-            self.storage.imageDictionary[[data objectAtIndex:0]] = self.imgToAdd;
+            switch (self.addMode) {
+                case AddModeImage:
+                    self.storage.imageDictionary[[data objectAtIndex:0]] = self.imgToAdd;
+                    break;
+                case AddModeSound:
+                    break;
+                case AddModeVideo:
+                    self.storage.videoDictionary[[data objectAtIndex:0]] = self.vidToAdd;
+                    break;
+            }
             
-            ARObject * newObject = [[ARObject alloc] initWithID:self.garAnchor.cloudIdentifier resource:[data objectAtIndex:0] scaling:self.scalingFactor type:ResourceTypeImage];
+            ARObject * newObject = [[ARObject alloc] initWithID:[data objectAtIndex:1] resource:[data objectAtIndex:0] scaling:self.scalingFactor type:self.addMode];
             
             [self.room.objectList addObject:newObject];
-            [self.room.objectReferences setValue:[NSNumber numberWithUnsignedInteger:self.room.objectList.count] forKey:self.garAnchor.cloudIdentifier];
+            [self.room.objectReferences setValue:[NSNumber numberWithUnsignedInteger:self.room.objectList.count] forKey:[data objectAtIndex:1]];
             
             [self enterState:ProgramStateEdittingRoom];
         }];
@@ -169,17 +197,30 @@ typedef NS_ENUM(NSInteger, DialogType) {
     [self loadRoom];
 }
 
-- (void) initializeAddMode:(UIImage *)toAdd{
-    //self.imgAddView.image = toAdd;
+
+
+- (void)addImage:(UIImage *)toAdd {
+    self.addMode = AddModeImage;
     self.imgToAdd = toAdd;
+    
+    [self initializeAddMode];
+}
+
+- (void)addVideo:(NSURL *)toAdd {
+    self.addMode = AddModeVideo;
+    self.vidToAdd = toAdd;
+    [self initializeAddMode];
+}
+
+- (void)initializeAddMode {
     self.scalingFactor = 1;
     self.sldSize.value = 100;
-    //[_imgAddView setFrame: self.imgFrame];
     
     [self enterState:ProgramStateAddingToRoom];
 }
 
-- (void)loadRoom{
+
+- (void)loadRoom {
     [self clearScreen];
     
     switch (self.viewType) {
@@ -245,10 +286,18 @@ typedef NS_ENUM(NSInteger, DialogType) {
     
     self.drawnAnchors[anchor.cloudIdentifier] = self.arAnchor;
     
-    NSData *imageData = UIImagePNGRepresentation(self.imgToAdd);
-    NSString * base64String = [imageData base64EncodedStringWithOptions:0];
+    NSData *data;
     
-    [self.socket emit: @"addARObject" with: @[anchor.cloudIdentifier, base64String, @(self.scalingFactor), @0]];
+    if (_addMode == AddModeImage) {
+        data = UIImagePNGRepresentation(self.imgToAdd);
+    }
+    else if (_addMode == AddModeVideo) {
+        data = [NSData dataWithContentsOfURL:self.vidToAdd];
+    }
+
+    NSString * base64String = [data base64EncodedStringWithOptions:0];
+    
+    [self.socket emit: @"addARObject" with: @[anchor.cloudIdentifier, base64String, @(self.scalingFactor), @(self.addMode)]];
 }
 
 - (void)session:(GARSession *)session didFailToHostAnchor:(GARAnchor *)anchor {
@@ -275,8 +324,19 @@ typedef NS_ENUM(NSInteger, DialogType) {
     
     self.scalingFactor = r.scaling;
     
-    // We check if the resource exist already (by checking the cache
-    self.imgToAdd = [self.storage.imageDictionary objectForKey:r.resourceID];
+    switch (r.type) {
+        case ResourceTypeImage:
+            self.imgToAdd = [self.storage.imageDictionary objectForKey:r.resourceID];
+            _addMode = AddModeImage;
+            break;
+        case ResourceTypeSound:
+            break;
+        case ResourceTypeVideo:
+            self.vidToAdd = [self.storage.videoDictionary objectForKey:r.resourceID];
+            _addMode = AddModeVideo;
+            break;
+    }
+    
     self.arAnchor = [[ARAnchor alloc] initWithTransform:anchor.transform];
     
     [self.sceneView.session addAnchor:self.arAnchor];
@@ -409,14 +469,28 @@ typedef NS_ENUM(NSInteger, DialogType) {
 - (nullable SCNNode *)renderer:(id<SCNSceneRenderer>)renderer
                  nodeForAnchor:(ARAnchor *)anchor {
     if ([anchor isKindOfClass:[ARPlaneAnchor class]] == NO) {
-        //SCNScene *scene = [SCNScene sceneNamed:@"example.scnassets/andy.scn"];
-        //return [[scene rootNode] childNodeWithName:@"andy" recursively:NO];
-        //UIImage * test = [UIImage imageNamed: @"Elon_Musk_2015"];
-        NSLog(@"%f %f", self.imgToAdd.size.width, self.imgToAdd.size.height);
-        SCNPlane * plane = [SCNPlane planeWithWidth: self.imgToAdd.size.width / 5000 height: self.imgToAdd.size.height / 5000];
-        plane.firstMaterial.diffuse.contents = self.imgToAdd;
-        SCNNode * node = [SCNNode nodeWithGeometry:plane];
+        
+        SCNPlane * plane;
+        SCNNode * node;
+        
+        if (_addMode == AddModeImage) {
+            plane = [SCNPlane planeWithWidth: self.imgToAdd.size.width / 5000 height: self.imgToAdd.size.height / 5000];
+            plane.firstMaterial.diffuse.contents = self.imgToAdd;
+            node = [SCNNode nodeWithGeometry:plane];
+        }
+        else if (_addMode == AddModeVideo) {
+            node = [[ARVideoNode alloc] initWithURL:_vidToAdd];
+        }
+        
+        simd_float4x4 translation = matrix_identity_float4x4;
+        translation.columns[3].z = -1.0;
+        
         node.scale = SCNVector3Make(self.scalingFactor, self.scalingFactor, self.scalingFactor);
+        
+        //node.simdTransform = matrix_multiply(self.sceneView.session.currentFrame.camera.transform, translation);
+        //node.eulerAngles = SCNVector3FromFloat3(3.14);
+        node.eulerAngles = SCNVector3Make(0, GLKMathDegreesToRadians(180), GLKMathDegreesToRadians(90));
+
         self.currentNode = node;
         return node;
     } else {

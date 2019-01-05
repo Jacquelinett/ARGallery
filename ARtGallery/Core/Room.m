@@ -34,9 +34,9 @@
                 NSString *anchor = value[@"anchor_identifier"];
                 NSString *resource = value[@"resource_identifier"];
                 float scaling = [value[@"scaling"] floatValue];
-                NSNumber *type = value[@"type"];
+                int type = [value[@"type"] intValue];
                 
-                id arObj = [[ARObject alloc] initWithID:anchor resource:resource scaling:scaling type:(int)type];
+                id arObj = [[ARObject alloc] initWithID:anchor resource:resource scaling:scaling type:type];
                 if (arObj) {
                     [self.objectReferences setValue:[NSNumber numberWithUnsignedInteger:self.objectList.count] forKey:anchor];
                     [self.objectList addObject:arObj];
