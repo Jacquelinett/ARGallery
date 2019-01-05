@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		02797976208FD32A00DFCBEB /* example.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 02797975208FD32A00DFCBEB /* example.scnassets */; };
 		0285F7F7208A82B900A7B463 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0285F7F6208A82B900A7B463 /* AppDelegate.m */; };
 		0285F7FD208A82B900A7B463 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0285F7FB208A82B900A7B463 /* Main.storyboard */; };
 		0285F7FF208A82B900A7B463 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0285F7FE208A82B900A7B463 /* Assets.xcassets */; };
@@ -22,6 +21,10 @@
 		4F2EC6DD2110B592000C9259 /* ARMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F2EC6DC2110B592000C9259 /* ARMenuViewController.m */; };
 		4F3EB0C920FD28E5003D6F1F /* ARCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F3EB0C820FD28E5003D6F1F /* ARCollectionViewController.m */; };
 		4F72F0A0210114E40072DFE9 /* ARCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F72F09F210114E40072DFE9 /* ARCollectionViewCell.m */; };
+		4F91677721A304F300624C4E /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F91677621A304F300624C4E /* MobileCoreServices.framework */; };
+		4F91677A21A3103900624C4E /* SpriteKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F91677921A3103900624C4E /* SpriteKit.framework */; };
+		4F91677C21A3104100624C4E /* ARKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F91677B21A3104100624C4E /* ARKit.framework */; };
+		4F91677F21A35E1B00624C4E /* ARVideoNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F91677E21A35E1B00624C4E /* ARVideoNode.m */; };
 		4FDA2D9420D471D6003A927E /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FDA2D9320D471D6003A927E /* LoginViewController.m */; };
 		4FDA2D9720D476FF003A927E /* GreetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FDA2D9620D476FF003A927E /* GreetViewController.m */; };
 		4FDA2DA220D98F9E003A927E /* NavigationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FDA2DA120D98F9E003A927E /* NavigationViewController.m */; };
@@ -30,7 +33,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		02797975208FD32A00DFCBEB /* example.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = example.scnassets; sourceTree = "<group>"; };
 		0285F7F2208A82B900A7B463 /* ARtGallery.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARtGallery.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0285F7F5208A82B900A7B463 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0285F7F6208A82B900A7B463 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -43,7 +45,6 @@
 		0285F80E208A834200A7B463 /* MainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
 		0285F80F208A834200A7B463 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		06AA38AC71652E04D47E7D79 /* Pods-ARtGallery.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARtGallery.release.xcconfig"; path = "Pods/Target Support Files/Pods-ARtGallery/Pods-ARtGallery.release.xcconfig"; sourceTree = "<group>"; };
-		084CC6794D52F7BC5769CFAD /* Pods-CloudAnchorExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CloudAnchorExample.release.xcconfig"; path = "Pods/Target Support Files/Pods-CloudAnchorExample/Pods-CloudAnchorExample.release.xcconfig"; sourceTree = "<group>"; };
 		4F03739B20BEFB5D00316F67 /* Room.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Room.h; sourceTree = "<group>"; };
 		4F03739C20BEFB5D00316F67 /* Room.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Room.m; sourceTree = "<group>"; };
 		4F03739E20BF089E00316F67 /* ARObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARObject.h; sourceTree = "<group>"; };
@@ -53,13 +54,19 @@
 		4F248C72217CEB8900F434BC /* Storage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Storage.m; sourceTree = "<group>"; };
 		4F248C75217D044A00F434BC /* ViewTypeEnum.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewTypeEnum.h; sourceTree = "<group>"; };
 		4F248C77217D056200F434BC /* Configuration.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.txt; sourceTree = "<group>"; };
-		4F248C78217D0DC900F434BC /* ResourceType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ResourceType.h; sourceTree = "<group>"; };
+		4F248C78217D0DC900F434BC /* ResourceTypeEnum.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ResourceTypeEnum.h; sourceTree = "<group>"; };
 		4F2EC6DB2110B592000C9259 /* ARMenuViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARMenuViewController.h; sourceTree = "<group>"; };
 		4F2EC6DC2110B592000C9259 /* ARMenuViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ARMenuViewController.m; sourceTree = "<group>"; };
 		4F3EB0C720FD28E5003D6F1F /* ARCollectionViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARCollectionViewController.h; sourceTree = "<group>"; };
 		4F3EB0C820FD28E5003D6F1F /* ARCollectionViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ARCollectionViewController.m; sourceTree = "<group>"; };
 		4F72F09E210114E40072DFE9 /* ARCollectionViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARCollectionViewCell.h; sourceTree = "<group>"; };
 		4F72F09F210114E40072DFE9 /* ARCollectionViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ARCollectionViewCell.m; sourceTree = "<group>"; };
+		4F91677621A304F300624C4E /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		4F91677821A3086700624C4E /* AddModeEnum.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddModeEnum.h; sourceTree = "<group>"; };
+		4F91677921A3103900624C4E /* SpriteKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpriteKit.framework; path = System/Library/Frameworks/SpriteKit.framework; sourceTree = SDKROOT; };
+		4F91677B21A3104100624C4E /* ARKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ARKit.framework; path = System/Library/Frameworks/ARKit.framework; sourceTree = SDKROOT; };
+		4F91677D21A35E1B00624C4E /* ARVideoNode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARVideoNode.h; sourceTree = "<group>"; };
+		4F91677E21A35E1B00624C4E /* ARVideoNode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ARVideoNode.m; sourceTree = "<group>"; };
 		4FDA2D9220D471D6003A927E /* LoginViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
 		4FDA2D9320D471D6003A927E /* LoginViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		4FDA2D9520D476FF003A927E /* GreetViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GreetViewController.h; sourceTree = "<group>"; };
@@ -70,7 +77,6 @@
 		4FDA2DA420D9DFF8003A927E /* MenuViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MenuViewController.m; sourceTree = "<group>"; };
 		61F9E7B651EF06410CCEF64C /* Pods-ARtGallery.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARtGallery.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARtGallery/Pods-ARtGallery.debug.xcconfig"; sourceTree = "<group>"; };
 		6E47A0ADD69E1312D9774582 /* Pods_ARtGallery.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ARtGallery.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		9520C75C7C4D3ACF4F7A3A24 /* Pods-CloudAnchorExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CloudAnchorExample.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CloudAnchorExample/Pods-CloudAnchorExample.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,6 +84,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F91677C21A3104100624C4E /* ARKit.framework in Frameworks */,
+				4F91677A21A3103900624C4E /* SpriteKit.framework in Frameworks */,
+				4F91677721A304F300624C4E /* MobileCoreServices.framework in Frameworks */,
 				4F17276620D0385E00EF0E9F /* Security.framework in Frameworks */,
 				6A2DD3411BC3870179C47309 /* Pods_ARtGallery.framework in Frameworks */,
 			);
@@ -110,7 +119,6 @@
 				4F248C74217D034800F434BC /* Miscanellous */,
 				4F50B62521065F47005A54B6 /* Core */,
 				4F50B62421065EEA005A54B6 /* UIClasses */,
-				02797975208FD32A00DFCBEB /* example.scnassets */,
 				0285F80F208A834200A7B463 /* GoogleService-Info.plist */,
 				0285F7F5208A82B900A7B463 /* AppDelegate.h */,
 				0285F7F6208A82B900A7B463 /* AppDelegate.m */,
@@ -128,7 +136,8 @@
 			children = (
 				4F248C75217D044A00F434BC /* ViewTypeEnum.h */,
 				4F248C77217D056200F434BC /* Configuration.txt */,
-				4F248C78217D0DC900F434BC /* ResourceType.h */,
+				4F248C78217D0DC900F434BC /* ResourceTypeEnum.h */,
+				4F91677821A3086700624C4E /* AddModeEnum.h */,
 			);
 			path = Miscanellous;
 			sourceTree = "<group>";
@@ -181,6 +190,8 @@
 				4F03739F20BF089E00316F67 /* ARObject.m */,
 				4F248C71217CEB8900F434BC /* Storage.h */,
 				4F248C72217CEB8900F434BC /* Storage.m */,
+				4F91677D21A35E1B00624C4E /* ARVideoNode.h */,
+				4F91677E21A35E1B00624C4E /* ARVideoNode.m */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -188,8 +199,6 @@
 		5A1E3347CAAFAAF684FFC1E8 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				9520C75C7C4D3ACF4F7A3A24 /* Pods-CloudAnchorExample.debug.xcconfig */,
-				084CC6794D52F7BC5769CFAD /* Pods-CloudAnchorExample.release.xcconfig */,
 				61F9E7B651EF06410CCEF64C /* Pods-ARtGallery.debug.xcconfig */,
 				06AA38AC71652E04D47E7D79 /* Pods-ARtGallery.release.xcconfig */,
 			);
@@ -199,6 +208,9 @@
 		72E0C2BDA4A5C5C29CB98AED /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4F91677B21A3104100624C4E /* ARKit.framework */,
+				4F91677921A3103900624C4E /* SpriteKit.framework */,
+				4F91677621A304F300624C4E /* MobileCoreServices.framework */,
 				4F17276520D0385E00EF0E9F /* Security.framework */,
 				6E47A0ADD69E1312D9774582 /* Pods_ARtGallery.framework */,
 			);
@@ -265,7 +277,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				02797976208FD32A00DFCBEB /* example.scnassets in Resources */,
 				0285F802208A82B900A7B463 /* LaunchScreen.storyboard in Resources */,
 				0285F811208A834200A7B463 /* GoogleService-Info.plist in Resources */,
 				0285F7FF208A82B900A7B463 /* Assets.xcassets in Resources */,
@@ -351,6 +362,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F91677F21A35E1B00624C4E /* ARVideoNode.m in Sources */,
 				4F0373A020BF089E00316F67 /* ARObject.m in Sources */,
 				4FDA2DA220D98F9E003A927E /* NavigationViewController.m in Sources */,
 				4F248C73217CEB8900F434BC /* Storage.m in Sources */,

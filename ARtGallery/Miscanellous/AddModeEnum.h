@@ -5,8 +5,10 @@
 //  Created by Jacqueline Tran on 11/19/18.
 //
 
-#ifndef AddModeEnum_h
-#define AddModeEnum_h
+#import <Foundation/Foundation.h>
 
-
-#endif /* AddModeEnum_h */
+typedef NS_ENUM(NSInteger, AddMode) {
+    AddModeImage = 0,
+    AddModeSound = 1,
+    AddModeVideo = 2
+};

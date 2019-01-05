@@ -6,7 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ResourceType.h"
+#import "ResourceTypeEnum.h"
 
 @interface ARObject : NSObject
 
@@ -15,6 +15,6 @@
 @property (assign, nonatomic) float scaling;
 @property (assign, nonatomic) ResourceType type;
 
-- (instancetype)initWithID:(NSString*)anchor resource:(NSString*)resource scaling:(float)scale type:(ResourceType)type;
+- (instancetype)initWithID:(NSString*)anchor resource:(NSString*)resource scaling:(float)scale type:(int)type;
 
 @end

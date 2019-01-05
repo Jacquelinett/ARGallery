@@ -12,7 +12,7 @@
 #import "ARObject.h"
 #import "Storage.h"
 #import "ViewTypeEnum.h"
-#import "ResourceType.h"
+#import "ResourceTypeEnum.h"
 
 @import SocketIO;
 

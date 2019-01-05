@@ -18,6 +18,7 @@
 #import <SceneKit/SceneKit.h>
 #import <SceneKit/ModelIO.h>
 #import <ARKit/ARKit.h>
+#import <SpriteKit/SpriteKit.h>
 #import <ARCore/ARCore.h>
 #import <ModelIO/ModelIO.h>
 #import <FirebaseDatabase/FirebaseDatabase.h>
@@ -28,7 +29,9 @@
 
 #import "Room.h"
 #import "Storage.h"
+#import "ARVideoNode.h"
 #import "ViewTypeEnum.h"
+#import "AddModeEnum.h"
 //#import "GreetViewController.h"
 
 @import SocketIO;
@@ -79,7 +82,9 @@ typedef NS_ENUM(NSInteger, ProgramState) {
 @property (strong, nonatomic) NSMutableDictionary *loadList;
 @property (strong, nonatomic) NSMutableDictionary *loadingList;
 
+@property (assign, nonatomic) AddMode addMode;
 @property (strong, nonatomic) UIImage *imgToAdd;
+@property (strong, nonatomic) NSURL *vidToAdd;
 @property (assign, nonatomic) float scalingFactor;
 
 - (IBAction)btnCancelAdd_pressed:(id)sender;
@@ -87,7 +92,8 @@ typedef NS_ENUM(NSInteger, ProgramState) {
 - (IBAction)sldSize_valueChanged:(id)sender;
 
 - (void)initialize;
-- (void)initializeAddMode:(UIImage *)toAdd;
+- (void)addImage:(UIImage *)toAdd;
+- (void)addVideo:(NSURL *)toAdd;
 - (ViewType)getViewType;
 - (void)removeARObject:(NSString*)identifier;
 

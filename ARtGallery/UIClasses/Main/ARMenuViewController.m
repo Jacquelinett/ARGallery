@@ -37,7 +37,7 @@
  }*/
 
 - (IBAction)btnDelete_pressed:(id)sender {
-    [_socket emit: @"removeARObject" with: @[self.controlling.anchorID]];
+    [_socket emit: @"removeARObject" with: @[self.controlling.anchorID, @(self.controlling.type)]];
 
 }
 

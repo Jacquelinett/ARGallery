@@ -6,10 +6,19 @@
 //
 
 #import <SceneKit/SceneKit.h>
+#import <ARKit/ARKit.h>
+#import <SpriteKit/SpriteKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ARVideoNode : SCNNode
+
+@property (strong, nonatomic) SKVideoNode *video;
+@property (strong, nonatomic) NSURL *url;
+@property (strong, nonatomic) SKScene *vidScene;
+
+- (instancetype)initWithURL:(NSURL*)url;
+- (void) playVideo;
 
 @end
 

@@ -108,6 +108,13 @@
     }
 }
 
+- (NSString *)documentsPathForFileName:(NSString *)name {
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES);
+    NSString *documentsPath = [paths objectAtIndex:0];
+    
+    return [documentsPath stringByAppendingPathComponent:name];
+}
+
 - (void) initialize:(SocketIOClient *)socket storage:(Storage *)storage view:(ViewType)type {
     if (!self.socket) {
         self.socket = socket;
@@ -134,12 +141,28 @@
         }];
         
         [self.socket on:@"imageDataForARObject" callback:^(NSArray* data, SocketAckEmitter* ack) {
-            NSData *dataEncoded = [[NSData alloc] initWithBase64EncodedString:[data objectAtIndex:1]  options:0];
-            UIImage *image = [UIImage imageWithData:dataEncoded];
-            
             NSString * identifier = [data objectAtIndex: 0];
+            ResourceType type = [[data objectAtIndex:1] intValue];
+            NSData *dataEncoded = [[NSData alloc] initWithBase64EncodedString:[data objectAtIndex:2]  options:0];
             
-            [self.storage.imageDictionary setObject:image forKey:identifier];
+            if (type == ResourceTypeImage) {
+                UIImage *image = [UIImage imageWithData:dataEncoded];
+                [self.storage.imageDictionary setObject:image forKey:identifier];
+            }
+            else if (type == ResourceTypeSound) {
+                //UIImage *image = [UIImage imageWithData:dataEncoded];
+                
+
+                //[self.storage.imageDictionary setObject:image forKey:identifier];
+            }
+            else if (type == ResourceTypeVideo) {
+                NSString *filePath = [self documentsPathForFileName:[NSString stringWithFormat:@"%@.mp4", identifier]];
+                [dataEncoded writeToFile:filePath atomically:YES];
+                
+                NSURL *video =  [NSURL fileURLWithPath:filePath];
+                
+                [self.storage.videoDictionary setObject:video forKey:identifier];
+            }
             
             self.loadingCount++;
             

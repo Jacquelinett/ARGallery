@@ -5,6 +5,8 @@
 //  Created by Jacqueline on 7/16/18.
 //
 
+#import <MobileCoreServices/MobileCoreServices.h>
+
 #import "ARCollectionViewController.h"
 #import "ARMenuViewController.h"
 
@@ -82,8 +84,17 @@ static NSString * const reuseIdentifier = @"Cell";
         //cell.backgroundColor = UIColor.yellowColor;
         //cell.imageView.image = [UIImage imageNamed: @"Elon_Musk_2015"];
         ARObject * o = [self.parent.room.objectList objectAtIndex:(indexPath.row - 1)];
-        UIImage * test = self.parent.storage.imageDictionary[o.resourceID];
-        cell.imageView.image = self.parent.storage.imageDictionary[o.resourceID];
+        if (o.type == ResourceTypeImage) {
+            cell.imageView.image = self.parent.storage.imageDictionary[o.resourceID];
+        }
+        else if (o.type == ResourceTypeVideo){
+            NSURL *videoURL = self.parent.storage.videoDictionary[o.resourceID];
+            AVURLAsset *asset1 = [[AVURLAsset alloc] initWithURL:videoURL options:nil];
+            AVAssetImageGenerator *generate1 = [[AVAssetImageGenerator alloc] initWithAsset:asset1];
+            generate1.appliesPreferredTrackTransform = YES;
+            CMTime time = CMTimeMake(1, 2);
+            CGImageRef oneRef = [generate1 copyCGImageAtTime:time actualTime:NULL error:nil];
+            cell.imageView.image = [[UIImage alloc] initWithCGImage:oneRef]; }
     }
     
     return cell;
@@ -95,10 +106,11 @@ static NSString * const reuseIdentifier = @"Cell";
         UIImagePickerController * imagePicker = [[UIImagePickerController alloc] init];
         imagePicker.delegate = self;
         imagePicker.allowsEditing = YES;
-        
+        imagePicker.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:
+                                  UIImagePickerControllerSourceTypeCamera];
         
         UIAlertController *alertController =
-        [UIAlertController alertControllerWithTitle:@"Photo Source"
+        [UIAlertController alertControllerWithTitle:@"Media Source"
                                             message:@"Choose a source"
                                      preferredStyle:UIAlertControllerStyleActionSheet];
         UIAlertAction *cameraAction = [UIAlertAction actionWithTitle:@"Camera" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
@@ -106,13 +118,16 @@ static NSString * const reuseIdentifier = @"Cell";
             [self presentViewController:imagePicker animated:YES completion:NULL];
         }];
         
-        UIAlertAction *libraryAction = [UIAlertAction actionWithTitle:@"Photo Library" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        UIAlertAction *libraryAction = [UIAlertAction actionWithTitle:@"Media Library" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
             [self presentViewController:imagePicker animated:YES completion:NULL];
         }];
 
         [alertController addAction:cameraAction];
         [alertController addAction:libraryAction];
+        
+        alertController.popoverPresentationController.sourceView = self.view;
+        alertController.popoverPresentationController.sourceRect = CGRectMake(self.view.bounds.size.width / 2.0, self.view.bounds.size.height / 2.0, 1.0, 1.0);
         
         [self presentViewController:alertController animated:NO completion:^{}];
     } else {
@@ -124,15 +139,17 @@ static NSString * const reuseIdentifier = @"Cell";
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
-    
-    //_imageToAdd = info[UIImagePickerControllerEditedImage];
-    //self.imageView.image = chosenImage;
-    
     [picker dismissViewControllerAnimated:YES completion:NULL];
     
     self.tabBarController.selectedIndex = 0;
     MainViewController * view = [self.tabBarController.viewControllers objectAtIndex:0];
-    [view initializeAddMode:info[UIImagePickerControllerEditedImage]];
+    
+    if([info[UIImagePickerControllerMediaType] isEqualToString:(__bridge NSString *)(kUTTypeImage)]) {
+        [view addImage:info[UIImagePickerControllerEditedImage]];
+    }
+    else {
+        [view addVideo:info[UIImagePickerControllerMediaURL]];
+    }
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {

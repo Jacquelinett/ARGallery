@@ -9,13 +9,13 @@
 
 @implementation ARObject
 
-- (instancetype)initWithID:(NSString*)anchor resource:(NSString*)resource scaling:(float)scale type:(ResourceType)type {
+- (instancetype)initWithID:(NSString*)anchor resource:(NSString*)resource scaling:(float)scale type:(int)enumType {
     self = [super init];
     if (self) {
         self.anchorID = anchor;
         self.resourceID = resource;
         self.scaling = scale;
-        self.type = type;
+        self.type = enumType;
     }
     return self;
 }
